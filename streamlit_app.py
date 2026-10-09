@@ -242,58 +242,102 @@ def render_dashboard():
     # Κάτω από τα metrics η οριζόντια γραμμή
     st.divider()
     
-    st.write(":material/upload:")
+   
     if database.get_total_gross_profit_year() == 0:
         st.markdown("""
-            <div class="upload_data">
-                <div class="upload_icon"></div>
-                <div class="title"><h2>Welcome to Your Analytics Dashboard</h2></div>
-                <div class="text"><p>To get started, please upload your data file(CSV or Excel)<p></div>
-            </div>
-
             <style>
-                .upload_data {
-                    display:flex;
-                    flex-direction:column;
+                div[data-testid="stVerticalBlockBorderWrapper"] {
+                    background-color: #151D29;
+                    border: 1px solid rgba(41, 181, 232, 0.25);
+                    border-radius: 16px;
+                    padding: 24px;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                }
+                
+                .upload_icon {
+                    display: flex;
                     justify-content: center;
                     align-items: center;
-                    width:100%;
-                    height: 40vh;
-                    border:1px solid rgba(41, 181, 232, 0.25);
-                    border-radius: 14px;
-                    background-color: #151D29;
+                    margin-bottom: 20px;
                 }
 
-                .upload_icon {
-                    display:flex;
-                    border:1px solid white;
-                    width: 50%;
-                    height:10vh;
+                
+                .card-title {
+                    color: #FFFFFF;
+                    font-size: 26px;
+                    font-weight: 700;
+                    text-align: center;
+                    margin-bottom: 10px;
+                    line-height: 1.3;
                 }
 
-                .title {
-                    display:flex;
-                    border:1px solid white;
-                    width: 50%;
-                    height:10vh;
-                    font-weight:normal;
-                    justify-content: center;
-                    text-align: text;
-                    
+                .card-subtitle {
+                    color: #9499B3;
+                    font-size: 14px;
+                    text-align: center;
+                    margin-bottom: 25px;
+                    line-height: 1.5;
                 }
 
-                .text {
-                    display:flex;
-                    border:1px solid white;
-                    width: 50%;
-                    height:10vh;
-                }
-
-                p {
-                    font-color:
+                
+                div[data-testid="stFileUploader"] {
+                    width: 100%;
+                    max-width: 420px;
+                    margin: 0 auto;
                 }
             </style>
-        """,unsafe_allow_html=True)
+        """,unsafe_allow_html=True,)
+
+
+        _, center_col, _ = st.columns([1, 2, 1])
+
+        with center_col:
+            # 2. Native Streamlit container acts as the blue card box
+            with st.container(border=True, key="upload-container"):
+                # Top visual section (Icon + Heading + Subtitle)
+                st.markdown("""
+                    <div class="upload_icon">
+                        <svg width="68" height="68" viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0px 0px 18px rgba(120, 119, 240, 0.5));">
+                            <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" />
+                            <polyline points="14 2 14 8 20 8" />
+                            <path d="M12 18V12" />
+                            <path d="M9 15L12 12L15 15" />
+                        </svg>
+                    </div>
+                    <div class="card-title">Welcome to Your Analytics Dashboard</div>
+                    <div class="card-subtitle">
+                        To get started, please upload your data file (CSV or Excel) below.
+                    </div>
+                    <style>
+                        .st-key-upload-container {
+                            background-color: #151D29 !important;
+                            border: 1px solid rgba(41, 181, 232, 0.3) !important;
+                            border-radius: 16px !important;
+                            padding: 24px !important;
+                        }
+                        .st-key-upload-button {
+                            display: flex !important;
+                            margin-left:38%;
+                        }
+
+                        .st-key-upload-button section {
+                            background-color: #151D29 !important;
+                            display: flex !important;
+                            justify-content: right !important;
+                            
+                        }
+
+                        .st-key-upload-button button{
+                            margin-left:10%;
+                        }
+
+                        
+                    </style>
+                    
+                    """,unsafe_allow_html=True,)
+                
+                uploaded_file = st.file_uploader("", type=["csv", "xlsx"], width=180, key="upload-button", accept_multiple_files=True, help="You can download template file to fill in your data through the donwload data")
+                
         st.stop()
     col1, col2 = st.columns(2)
 
