@@ -223,15 +223,16 @@ with st.sidebar:
         if template == "Earnings":
             st.download_button(
                 label="Earnings",
-                data=utils.get_earnings().to_csv(index=False).encode("utf-8"),
+                data=utils.download_csv("earnings").to_csv(index=False).encode("utf-8"),
                 file_name="earnings.csv",
                 mime="text/csv",
                 icon=":material/download:",
             )
+            
         elif template == "Pending Earnings":
             st.download_button(
                 label="Pending Earnings",
-                data=utils.get_pending_earnings().to_csv(index=False).encode("utf-8"),
+                data=utils.download_csv("pearnings").to_csv(index=False).encode("utf-8"),
                 file_name="pending_earnings.csv",
                 mime="text/csv",
                 icon=":material/download:", 
@@ -239,15 +240,16 @@ with st.sidebar:
         elif template == "Investments":
             st.download_button(
                 label="Ivestments",
-                data=utils.get_investments().to_csv(index=False).encode("utf-8"),
+                data=utils.download_csv("investments").to_csv(index=False).encode("utf-8"),
                 file_name="ivestments.csv",
                 mime="text/csv",
                 icon=":material/download:", 
             )
         elif template == "Costs":
+           
             st.download_button(
                 label="Costs",
-                data=utils.get_losses_or_costs("costs").to_csv(index=False).encode("utf-8"),
+                data=utils.download_csv("costs").to_csv(index=False).encode("utf-8"),
                 file_name="costs.csv",
                 mime="text/csv",
                 icon=":material/download:", 
@@ -255,7 +257,7 @@ with st.sidebar:
         elif template == "Losses":
             st.download_button(
                 label="Losses",
-                data=utils.get_losses_or_costs("losses").to_csv(index=False).encode("utf-8"),
+                data=utils.download_csv("losses").to_csv(index=False).encode("utf-8"),
                 file_name="losses.csv",
                 mime="text/csv",
                 icon=":material/download:" 
@@ -338,7 +340,8 @@ def render_dashboard():
     st.divider()
     
    
-    if database.get_total_gross_profit_year() == 0:
+    if utils.get_earnings().empty and utils.get_losses_or_costs("costs").empty:
+        
         st.markdown("""
             <style>
                 div[data-testid="stVerticalBlockBorderWrapper"] {
@@ -401,7 +404,8 @@ def render_dashboard():
                     </div>
                     <div class="card-title">Welcome to Your Analytics Dashboard</div>
                     <div class="card-subtitle">
-                        To get started, please upload your data file (CSV or Excel) below.
+                        <span>To get started, please upload your data file (CSV or Excel) below.</span>
+                        <p>Download a template to get started, fill in your figures, and upload the file.</p>
                     </div>
                     <style>
                         .st-key-upload-container {
@@ -435,8 +439,13 @@ def render_dashboard():
                     """,unsafe_allow_html=True,)
                 
                 uploaded_file = st.file_uploader("", type=["csv"], width=180, key="upload-button", accept_multiple_files=True)
-                
+                  
         st.stop()
+    elif not(utils.get_earnings().empty and utils.get_losses_or_costs("costs").empty):
+        for uploaded_file in uploaded_file:
+            dataframe = pd.read_csv(uploaded_file) 
+            
+
     col1, col2 = st.columns(2)
 
     # Tα δεδομένα της παρακάτω εντολής είναι σε μορφή : [('.', '.'), ('.', '.'), ('.', '.')]

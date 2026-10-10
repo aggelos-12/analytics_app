@@ -87,6 +87,10 @@ def get_earnings():
     data_earnings = database.get_earnings()
     # μετατρέπεται σε τύπο pandas
     dataframe_earnings = pd.DataFrame(data_earnings, columns=['ID', 'CATEGORY', 'PROFIT', 'DESCRIPTION', 'ROI', 'NOTES', 'DATE'])
+    #Σε περίπτωση όπου ο πίνακας είναι άδειος, διαγράφεται η στήλη ID
+    if dataframe_earnings.empty:
+        dataframe_earnings = dataframe_earnings.drop(columns=['ID'])
+        return dataframe_earnings
     # μετατρέπω την DATE στήλη σε datetime αντικείμενο, επιπλέον βάζω format mixed, δίοτι όταν
     # ο χρήσης προσθέτει ένα entry από το st.data_editor δεν θα έχει το ίδιο format με αυτό που
     # έχει θέσει η βάση οπότε έτσι θα μπορέσει η to_datetime να είναι δυναμική όταν αλλάζει
@@ -103,6 +107,9 @@ def get_losses_or_costs(choice):
         data_losses = database.get_losses()
         # Τα μετατρέπω σε pandas δεδομένα
         dataframe_losses = pd.DataFrame(data_losses, columns=['ID', 'CATEGORY', 'LOSS', 'DESCRIPTION', 'DATE', 'NOTES'])
+        #Σε περίπτωση όπου ο πίνακας είναι άδειος, διαγράφεται η στήλη ID
+        if dataframe_losses.empty:
+            return dataframe_losses.drop(columns=['ID'])
         # Η στήλη DATE είναι τύπος str, επιπλέον έχει formats 
         # ( '2024-05-01 00:00:00' από το πίνακα sql και '2024-05-01' από το κουμπί add loss)
         # Μετατρέπω τα strings σε datetime τύπο με format='mixed' ώστε να διαβαστούν σωστά όλα τα formats,
@@ -113,6 +120,9 @@ def get_losses_or_costs(choice):
     else:
         data_costs = database.get_costs()
         dataframe_costs = pd.DataFrame(data_costs, columns=['ID','DATE', 'COST', 'DESCRIPTION', 'CATEGORY', 'NOTES']) 
+        #Σε περίπτωση όπου ο πίνακας είναι άδειος, διαγράφεται η στήλη ID
+        if dataframe_costs.empty:
+            return dataframe_costs.drop(columns=['ID'])
         dataframe_costs['DATE'] = pd.to_datetime(dataframe_costs['DATE'], format='mixed')
         dataframe_costs = dataframe_costs.sort_values(by='DATE', ascending=False)
         return dataframe_costs
@@ -123,6 +133,10 @@ def get_investments():
     data_investmens = database.get_investments()
     data_investmens = pd.DataFrame(data_investmens, columns=['ID', 'DATE', 'ENTRY', 'DESCRIPTION', 'AMOUNT', 'CURRENCY', 'PLATFORM', 'ACCOUNT'])
     data_investmens['DATE'] = pd.to_datetime(data_investmens['DATE'], format='mixed')
+    #Σε περίπτωση όπου ο πίνακας είναι άδειος, διαγράφεται η στήλη ID
+    if data_investmens.empty:
+        return data_investmens.drop(columns=['ID'])
+    
     # φιλτράρω τα δεδομένα έτσι ώστε να επιστρέφονται μόνο οι επενδύσεις οι οποίες είναι
     # ακόμα ενεργές βάση ημερομηνίας
     data_investmens = data_investmens[data_investmens["DATE"] > current_date]
@@ -145,6 +159,10 @@ def get_investments_line_chart():
 def get_pending_earnings():
     data_pending_earnings = database.get_pending_earnings()
     dataframe_pending_earnings = pd.DataFrame(data_pending_earnings, columns=['ID', 'CATEGORY', 'PROFIT', 'DESCRIPTION', 'ROI', 'NOTES', 'DATE', 'IMMEDIATE_TRANSFER'])
+    #Σε περίπτωση όπου ο πίνακας είναι άδειος, διαγράφεται η στήλη ID
+    if dataframe_pending_earnings.empty:
+        return dataframe_pending_earnings.drop(columns=['ID'])
+    
     dataframe_pending_earnings['DATE'] = pd.to_datetime(dataframe_pending_earnings['DATE'], format='mixed')
     dataframe_pending_earnings = dataframe_pending_earnings.sort_values(by="DATE", ascending=False)
     return dataframe_pending_earnings
@@ -156,7 +174,85 @@ def get_categories(func):
     return data_categories
 
 
+def add_template_row(dataframe, table):
+    if table == "earnings":
+        new_row = pd.Series({ 
+            "CATEGORY": "your category",
+            "PROFIT": 0,
+            "DESCRIPTION": "your description",
+            "ROI" :0,
+            "NOTES": "your notes",
+            "DATE": "dd-mm-yyyy"
+        })
+    elif table == "costs":
+        new_row = pd.Series({ 
+            "DATE": "dd-mm-yyyy",
+            "COST": 0.0,
+            "DESCRIPTION": "your description",
+            "CATEGORY": "your category",
+            "NOTES": "your notes"
+            
+        })
+    elif table == "losses":
+        new_row = pd.Series({
+            "CATEGORY": "your category",
+            "LOSS": 0.0,
+            "DESCRIPTION": "your description", 
+            "DATE": "dd-mm-yyyy",
+            "NOTES": "your notes"
+            
+        })
+    elif table == "investments":
+        new_row = pd.Series({
+            "DATE": "dd-mm-yyyy",
+            "ENTRY": 0.0,
+            "DESCRIPTION": "your description", 
+            "AMOUNT": 0,
+            "CURRENCY": "EUR",
+            "PLATFORM": "your platform",
+            "ACCOUNT": "your account"
+        })
+    elif table == "pearnings":
+        new_row = pd.Series({ 
+            "CATEGORY": "your category",
+            "PROFIT": 0.0,
+            "DESCRIPTION": "your description",
+            "ROI" :0,
+            "NOTES": "your notes",
+            "DATE": "dd-mm-yyyy",
+            "IMMEDIATE_TRANSFER": 1
+        })        
 
+
+    dataframe = pd.concat([dataframe,new_row.to_frame().T])
+    return dataframe
+
+def download_csv(table):
+    if table == "earnings":
+        dataframe = get_earnings()
+        if dataframe.empty:
+            dataframe = add_template_row(dataframe, "earnings")
+            
+    elif table == "costs":
+        dataframe = get_losses_or_costs("costs")
+        if dataframe.empty:
+            dataframe = add_template_row(dataframe, "costs")
+
+    elif table == "pearnings":
+        dataframe = get_pending_earnings()
+        if dataframe.empty:
+            dataframe = add_template_row(dataframe, "pearnings")
+    
+    elif table == "losses":
+        dataframe = get_losses_or_costs("losses")
+        if dataframe.empty:
+            dataframe = add_template_row(dataframe, "losses")
+
+    elif table == "investments":
+        dataframe = get_investments()
+        if dataframe.empty:
+            dataframe = add_template_row(dataframe, "investments")
+    return dataframe
 
 if __name__=='__main__':
-    print(calculate_percentage_difference_for_costs_and_losses())
+    print(get_earnings())
