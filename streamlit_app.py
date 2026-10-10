@@ -72,120 +72,215 @@ time.sleep(0.05)
 
 with st.sidebar:
 
-  st.markdown(
-      """
-        <style>
-            /* εξατομίκευση sidebar */
-            [data-testid="stSidebar"] {
-                background-color: #0E1117 !important;
-                border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
-            }
-            /* hide collapse sidebar button */
-            [data-testid="stSidebarCollapseButton"] {
-                display: none;
-            }
+    st.markdown(
+        """
+            <style>
+                /* εξατομίκευση sidebar */
+                [data-testid="stSidebar"] {
+                    background-color: #0E1117 !important;
+                    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+                }
+                /* hide collapse sidebar button */
+                [data-testid="stSidebarCollapseButton"] {
+                    display: none;
+                }
 
-            /* εξατομίκευση buttons */
-            [data-testid="stSidebar"] div.stButton > button {
-                background-color: transparent !important;
-                color: #8E95A5 !important;
-                border: 1px solid transparent !important;
-                border-radius: 8px !important;
-                padding: 8px 12px !important;
-                font-weight: 500 !important;
-                font-size: 14px !important;
+                /* εξατομίκευση buttons */
+                [data-testid="stSidebar"] div.stButton > button {
+                    background-color: transparent !important;
+                    color: #8E95A5 !important;
+                    border: 1px solid transparent !important;
+                    border-radius: 8px !important;
+                    padding: 8px 12px !important;
+                    font-weight: 500 !important;
+                    font-size: 14px !important;
+                    
+                    
+                }
+
+                /* Inner wrapper resets to preserve left alignment */
+                [data-testid="stSidebar"] div.stButton > button > div {
+                    display: flex !important;
+                    justify-content: flex-start !important;
+                }
+
+
+                /* εξατομίκευση hover */
+                [data-testid="stSidebar"] div.stButton > button[kind="secondary"]:hover {
+                    background-color: rgba(255, 255, 255, 0.04) !important;
+                    color: #E2E8F0 !important;
+                    border-color: rgba(255, 255, 255, 0.05) !important;
+                    transition: all 0.4s linear;
+                }
+
+                /* εξατομίκευση επιλεγμένου button  */
+                [data-testid="stSidebar"] div.stButton > button[kind="primary"] {
+                    background: linear-gradient(90deg, rgba(56, 189, 248, 0.08) 0%, rgba(30, 41, 59, 0.5) 100%) !important;
+                    color: #FFFFFF !important;
+                    border: 1px solid rgba(56, 189, 248, 0.15) !important;
+                    border-left: 3.5px solid #0284C7 !important; /* Vivid Blue Accent */
+                    font-weight: 600 !important;
+                }
+
                 
-                
-            }
-
-            /* Inner wrapper resets to preserve left alignment */
-            [data-testid="stSidebar"] div.stButton > button > div {
-                display: flex !important;
-                justify-content: flex-start !important;
-            }
-
-
-            /* εξατομίκευση hover */
-            [data-testid="stSidebar"] div.stButton > button[kind="secondary"]:hover {
-                background-color: rgba(255, 255, 255, 0.04) !important;
-                color: #E2E8F0 !important;
-                border-color: rgba(255, 255, 255, 0.05) !important;
-                transition: all 0.4s linear;
-            }
-
-            /* εξατομίκευση επιλεγμένου button  */
-            [data-testid="stSidebar"] div.stButton > button[kind="primary"] {
-                background: linear-gradient(90deg, rgba(56, 189, 248, 0.08) 0%, rgba(30, 41, 59, 0.5) 100%) !important;
-                color: #FFFFFF !important;
-                border: 1px solid rgba(56, 189, 248, 0.15) !important;
-                border-left: 3.5px solid #0284C7 !important; /* Vivid Blue Accent */
-                font-weight: 600 !important;
-            }
-
-            
-            .sidebar-nav-title {
-                font-size: 11px;
-                font-weight: 700;
-                letter-spacing: 0.1em;
-                text-transform: uppercase;
-                color: #4B5563;
-                padding: 16px 10px 4px 10px;
-                margin: 0;
-            }
-        </style>
-        """,
-      unsafe_allow_html=True,
-  )
+                .sidebar-nav-title {
+                    font-size: 11px;
+                    font-weight: 700;
+                    letter-spacing: 0.1em;
+                    text-transform: uppercase;
+                    color: #4B5563;
+                    padding: 16px 10px 4px 10px;
+                    margin: 0;
+                }
+            </style>
+    """,unsafe_allow_html=True,)
 
   # Logo
-  st.markdown("""<div style="display:flex; justify-content:left; gap:10px;margin-bottom:20px;border-bottom:1px solid #394353; padding: 4px 6px 20px 6px;">
-                    <div 
-                        style="
-                        display:flex;
-                        width: 36px;
-                        height:36px;
-                        background-color:#1E293B;
-                        border-radius:9px;
-                        border:solid 1px #394353;
-                        align-items:center;
-                        justify-content:center;
-                        "
-                    >
-                    ⚡
-                    </div>
-                    <div style="font-weight: 600; font-size: 15px;margin-top:5px;">Analytics App</div>
-                    </div>
-                </div>
-                
-                """
-              ,unsafe_allow_html=True
-    )
+    st.markdown("""
+        <div style="display:flex; justify-content:left; gap:10px;margin-bottom:20px;border-bottom:1px solid #394353; padding: 4px 6px 20px 6px;">
+            <div 
+                style="
+                display:flex;
+                width: 36px;
+                height:36px;
+                background-color:#1E293B;
+                border-radius:9px;
+                border:solid 1px #394353;
+                align-items:center;
+                justify-content:center;
+                ">⚡
+            </div>
+            <div style="font-weight: 600; font-size: 15px;margin-top:5px;">Analytics App</div>
+        </div>
+        
+    """,unsafe_allow_html=True)
 
   
-  def nav_item(label, icon_name, page_target):
-    is_active = st.session_state.page == page_target
-    if st.button(
-        label,
-        icon=icon_name,
-        use_container_width=True,
-        type="primary" if is_active else "secondary",
-    ):
-      st.session_state.page = page_target
-      st.rerun()
+    def nav_item(label, icon_name, page_target):
+        is_active = st.session_state.page == page_target
+        if st.button(
+            label,
+            icon=icon_name,
+            use_container_width=True,
+            type="primary" if is_active else "secondary",
+        ):
+            st.session_state.page = page_target
+            st.rerun()
 
-  # Dashboard , Costs & Losses navigation
-  nav_item("Dashboard", ":material/home:", "Dashboard")
-  nav_item("Costs & Losses", ":material/trending_down:", "Costs&Losses")
+    # Dashboard , Costs & Losses navigation
+    nav_item("Dashboard", ":material/home:", "Dashboard")
+    nav_item("Costs & Losses", ":material/trending_down:", "Costs&Losses")
 
-  # FINANCIALS text
-  st.markdown(
-      '<p class="sidebar-nav-title">FINANCIALS</p>', unsafe_allow_html=True
-  )
-  # Earnings , Investments navigation  
-  nav_item("Earnings", ":material/trending_up:", "Earnings")
-  nav_item("Investments", ":material/finance:", "Investments")
+    # FINANCIALS 
+    st.markdown('<p class="sidebar-nav-title">FINANCIALS</p>', unsafe_allow_html=True)
+    
+    nav_item("Earnings", ":material/trending_up:", "Earnings")
+    nav_item("Investments", ":material/finance:", "Investments")
 
- 
+    st.markdown('<p class="sidebar-nav-title">Templates</p>', unsafe_allow_html=True)
+    st.markdown("""
+        <style>
+            .st-key-upload-container div[data-testid="stDownloadButton"] button { 
+                width: 100% !important;                       /* Makes all buttons equal full width */
+                background-color: #1E2230 !important;          /* Button background */
+                color: #E2E8F0 !important;                     /* Text color */
+                border: 1px solid rgba(255, 255, 255, 0.12) !important;
+                border-radius: 8px !important;                 /* Rounded corners */
+                padding: 8px 14px !important;
+                font-size: 14px !important;
+                font-weight: 500 !important;
+                justify-content: flex-start !important;        /* Left-aligns icon + label */
+                gap: 8px !important;
+                transition: all 0.2s ease !important;
+            }
+
+            /* Hover effect for all buttons */
+            .st-key-template-buttons div[data-testid="stDownloadButton"] button:hover {
+                background-color: #2D3748 !important;
+                border-color: rgba(96, 165, 250, 0.4) !important;
+                color: #FFFFFF !important;
+                transform: translateY(-1px);
+            }
+        
+        </style>
+        
+    """, unsafe_allow_html=True)
+
+    # selectbox στο οποίο ο χρήστης επιλέγει ποιό template θέλει να κατεβάσει
+    template = st.selectbox(
+        "Select template",
+        options=["Earnings", "Pending Earnings", "Investments", "Costs", "Losses"],
+        accept_new_options=False,
+        key="template-selectbox",
+        placeholder="Select template",
+        index=None
+        
+    )
+
+    # Ανάλογα με την επιλογή το selectbox, εμφανίζεται το αντίστοιχο κουμπί
+    # ώστε να κατεβάσει ο χρήστης το αντίστοιχο CSV
+    with st.container(key="download-button-container"):
+        if template == "Earnings":
+            st.download_button(
+                label="Earnings",
+                data=utils.get_earnings().to_csv(index=False).encode("utf-8"),
+                file_name="earnings.csv",
+                mime="text/csv",
+                icon=":material/download:",
+            )
+        elif template == "Pending Earnings":
+            st.download_button(
+                label="Pending Earnings",
+                data=utils.get_pending_earnings().to_csv(index=False).encode("utf-8"),
+                file_name="pending_earnings.csv",
+                mime="text/csv",
+                icon=":material/download:", 
+            )
+        elif template == "Investments":
+            st.download_button(
+                label="Ivestments",
+                data=utils.get_investments().to_csv(index=False).encode("utf-8"),
+                file_name="ivestments.csv",
+                mime="text/csv",
+                icon=":material/download:", 
+            )
+        elif template == "Costs":
+            st.download_button(
+                label="Costs",
+                data=utils.get_losses_or_costs("costs").to_csv(index=False).encode("utf-8"),
+                file_name="costs.csv",
+                mime="text/csv",
+                icon=":material/download:", 
+            )
+        elif template == "Losses":
+            st.download_button(
+                label="Losses",
+                data=utils.get_losses_or_costs("losses").to_csv(index=False).encode("utf-8"),
+                file_name="losses.csv",
+                mime="text/csv",
+                icon=":material/download:" 
+            )
+    
+    # Eξατομίκεση για το selectbox και τα download buttons
+    st.markdown("""
+        <style>
+            .st-key-template-selectbox div[data-rac][role="group"] {
+                border: 0.5px solid #23262B;
+                background-color: #171A20;
+            }
+            .st-key-template-selectbox label { 
+                display: none !important;
+            }
+
+            .st-key-download-button-container button { 
+                background-color: #171A20;
+                border: 0.5px solid #23262B;
+            }
+
+
+        </style>
+    """, unsafe_allow_html=True)
+
 
   
 
@@ -318,12 +413,15 @@ def render_dashboard():
                         .st-key-upload-button {
                             display: flex !important;
                             margin-left:38%;
+                            
+                        }
+                        .st-key-upload-button label{
+                            display:none !important;
                         }
 
                         .st-key-upload-button section {
                             background-color: #151D29 !important;
                             display: flex !important;
-                            justify-content: right !important;
                             
                         }
 
@@ -336,7 +434,7 @@ def render_dashboard():
                     
                     """,unsafe_allow_html=True,)
                 
-                uploaded_file = st.file_uploader("", type=["csv", "xlsx"], width=180, key="upload-button", accept_multiple_files=True, help="You can download template file to fill in your data through the donwload data")
+                uploaded_file = st.file_uploader("", type=["csv"], width=180, key="upload-button", accept_multiple_files=True)
                 
         st.stop()
     col1, col2 = st.columns(2)
