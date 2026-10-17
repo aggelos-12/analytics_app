@@ -8,6 +8,7 @@ import pandas as pd
 import time
 import plotly.graph_objects as go
 from datetime import timedelta
+import loader
 
 
 st.set_page_config(page_title="My app", layout="wide")
@@ -29,12 +30,14 @@ current_year = datetime.now().year
 st.markdown(
     """
         <style>
+            /* εμφάνιση κουμπιών */ 
             [data-testid="stMain"] button[kind="secondary"] {
                 background: #363636 !important;
                 border-radius: 10px;            
                 padding: 10px 24px;                
                 box-shadow: 0 4px 12px rgba(110, 69, 226, 0.35);
             }
+            /* hover effect */
             [data-testid="stMain"] button[kind="secondary"]:hover {
                 background: #D3D3D3 !important;
                 color: black;
@@ -48,18 +51,33 @@ st.markdown(
 # Customize pop up μηνύματα του UI (GLOBAL)
 st.markdown(
 """
+    
     <style>
-        [data-testid="stToast"] {
+        /* εμφάνιση pop up μηνύματος */ 
+        [data-testid="stToast"]{
             background-color: #222222;
             border-radius: 25px;
-            opacity:1;
-            transition: opacity 1s ease-in-out;
-        }
+            animation-name: fadeout;
+            animation-duration: 8s;
+            animation-fill-mode: forwards;
+            font-weight: 100 !important;
+           
             
-    </style>
+        }
+        [data-testid="stToast"] p {
+            font-weight: 500 !important;
+            
+        }
+        
+       @keyframes fadeout { 
+            from {opacity:100%}
+            to {opacity:0%; visibility:hidden;}
+       }
+
+       }
+    </style>        
 """
 ,unsafe_allow_html=True)
-
 
 
 # ================================================================
@@ -94,11 +112,10 @@ with st.sidebar:
                     padding: 8px 12px !important;
                     font-weight: 500 !important;
                     font-size: 14px !important;
-                    
-                    
+                
                 }
 
-                /* Inner wrapper resets to preserve left alignment */
+                /*  wrapper για τα buttons ώστε να έχουν alignment στα αριστερά */
                 [data-testid="stSidebar"] div.stButton > button > div {
                     display: flex !important;
                     justify-content: flex-start !important;
@@ -177,31 +194,17 @@ with st.sidebar:
     nav_item("Earnings", ":material/trending_up:", "Earnings")
     nav_item("Investments", ":material/finance:", "Investments")
 
+    # Τemplates CSV list
     st.markdown('<p class="sidebar-nav-title">Templates</p>', unsafe_allow_html=True)
     st.markdown("""
         <style>
-            .st-key-upload-container div[data-testid="stDownloadButton"] button { 
-                width: 100% !important;                       /* Makes all buttons equal full width */
-                background-color: #1E2230 !important;          /* Button background */
-                color: #E2E8F0 !important;                     /* Text color */
-                border: 1px solid rgba(255, 255, 255, 0.12) !important;
-                border-radius: 8px !important;                 /* Rounded corners */
-                padding: 8px 14px !important;
-                font-size: 14px !important;
-                font-weight: 500 !important;
-                justify-content: flex-start !important;        /* Left-aligns icon + label */
-                gap: 8px !important;
-                transition: all 0.2s ease !important;
+            /* customize τα donwload buttons για τα templates */
+            .st-key-upload-container div[data-testid="stDownloadButton"] button {                       
+                background-color: #1E2230 !important;          
+                color: #E2E8F0 !important;                     
+                border: 1px solid #23262B !important;
+                border-radius: 8px !important;                 
             }
-
-            /* Hover effect for all buttons */
-            .st-key-template-buttons div[data-testid="stDownloadButton"] button:hover {
-                background-color: #2D3748 !important;
-                border-color: rgba(96, 165, 250, 0.4) !important;
-                color: #FFFFFF !important;
-                transform: translateY(-1px);
-            }
-        
         </style>
         
     """, unsafe_allow_html=True)
@@ -299,51 +302,12 @@ with st.sidebar:
 def render_dashboard():
     st.title("Dashboard")
     
-
-    # Δημιουργεί 5 στήλες (σαν containers) στα οποία χωρίζεται η οθόνη
-    c1, c2, c3, c4, c5 = st.columns(5)
-    # Customize τα metrics τα οποία εμφανίζονται στο dashboard
-    # !important βάζει σε προτεραίοτητα την συγκεκριμένη εντολή έναντι οποιαδήποτε άλλης
-    # η οποία εφαρμόζεται σε αυτό το στοιχείο
-    st.markdown("""
-                <style>
-                    [data-testid="stMetricLabel"] p {
-                        font-size:15px !important;
-                        text-transform: capitalize;
-                        
-                    }
-                </style>
-                """
-                , unsafe_allow_html=True)
-
-    # METRICS
-    with c1:
-        with st.container(border=True):
-            st.metric(label = f"Gross profit {current_year}", value = f"{database.get_total_gross_profit_year(current_year):,.2f}€", delta=utils.calculate_percentage_difference_year_to_year(database.get_total_gross_profit_year), format="percent", delta_description="vs. last year")
-    with c2:
-        with st.container(border=True):
-            st.metric(label = f"Net profit {current_year}", value = f"{database.get_total_net_profit_of_a_year(current_year):,.2f}€", delta=utils.calculate_percentage_difference_year_to_year(database.get_total_net_profit_of_a_year), delta_description="vs. last year", format="percent")
-    with c3:
-        with st.container(border=True):
-            st.metric(label = f"Total Cost & Losses {current_year}", value = f"{database.get_total_losses_year(current_year)+database.get_total_costs_year(current_year):,.2f}€", format="percent", delta=utils.calculate_percentage_difference_year_to_year(database.get_cost_losses_year), delta_description="vs. last year")
-    with c4:
-        with st.container(border=True):
-            st.metric(label = f"Total losses {current_year}", value = f"{database.get_total_losses_year(current_year):,.2f}€")
-    with c5:
-        with st.container(border=True):
-            st.metric(label = f"Total costs {current_year}", value = f"{database.get_total_costs_year(current_year):,.2f}€")
-
-
-          
-
-    # Κάτω από τα metrics η οριζόντια γραμμή
-    st.divider()
-    
-   
-    if utils.get_earnings().empty and utils.get_losses_or_costs("costs").empty:
-        
+ 
+    # Περίπτωση όπου οι πίνακες earnings και costs είναι κενοί
+    if utils.get_earnings().empty or utils.get_losses_or_costs("costs").empty:
         st.markdown("""
             <style>
+
                 div[data-testid="stVerticalBlockBorderWrapper"] {
                     background-color: #151D29;
                     border: 1px solid rgba(41, 181, 232, 0.25);
@@ -390,11 +354,13 @@ def render_dashboard():
         _, center_col, _ = st.columns([1, 2, 1])
 
         with center_col:
-            # 2. Native Streamlit container acts as the blue card box
+            # μπλέ container
             with st.container(border=True, key="upload-container"):
-                # Top visual section (Icon + Heading + Subtitle)
+                
                 st.markdown("""
+                    <!-- μπλέ container το οποίο πειλαμβάνει όλα τα υπόλοιπα elements -->
                     <div class="upload_icon">
+                        <!-- upload file icon -->
                         <svg width="68" height="68" viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0px 0px 18px rgba(120, 119, 240, 0.5));">
                             <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" />
                             <polyline points="14 2 14 8 20 8" />
@@ -402,23 +368,31 @@ def render_dashboard():
                             <path d="M9 15L12 12L15 15" />
                         </svg>
                     </div>
+                    <!-- Title div -->
                     <div class="card-title">Welcome to Your Analytics Dashboard</div>
+                    <!-- Subheader div -->
                     <div class="card-subtitle">
-                        <span>To get started, please upload your data file (CSV or Excel) below.</span>
+                        <span>To get started, please upload your data file (CSV) below.</span>
+                        <p>(required costs and earnings CSV)</p>
                         <p>Download a template to get started, fill in your figures, and upload the file.</p>
                     </div>
+
                     <style>
+
+                        /* εξατομίκευση μπλέ container */
                         .st-key-upload-container {
                             background-color: #151D29 !important;
                             border: 1px solid rgba(41, 181, 232, 0.3) !important;
                             border-radius: 16px !important;
                             padding: 24px !important;
                         }
+                        /* εξατόμικευση upload button */
                         .st-key-upload-button {
                             display: flex !important;
                             margin-left:38%;
                             
                         }
+                        
                         .st-key-upload-button label{
                             display:none !important;
                         }
@@ -437,19 +411,76 @@ def render_dashboard():
                     </style>
                     
                     """,unsafe_allow_html=True,)
-                
+
+                # upload button
                 uploaded_file = st.file_uploader("", type=["csv"], width=180, key="upload-button", accept_multiple_files=True)
-                  
-        st.stop()
-    elif not(utils.get_earnings().empty and utils.get_losses_or_costs("costs").empty):
-        for uploaded_file in uploaded_file:
-            dataframe = pd.read_csv(uploaded_file) 
+                
+                for file in uploaded_file:
+                    dataframe = pd.read_csv(file)
+                    
+                    # Για κάθε CSV το κάνω format με το module loader
+                    # ανάλογα με το text το οποίο επιστραφεί εμφανίζεται το αντίστοιχο μήνυμα
+                    result = loader.add_to_database(dataframe)
+                    # Περίπτωση όπου τα δεδομένα δεν είναι σωστά
+                    if result != "data has been added":
+                        st.error(body=result)
+                        
+                    else:
+                    
+                        st.success("Data has been added successfully")
+                   
+        # σταματάει το πρόγραμμα εδώ εφόσον δεν έχει τα απαρραίτητα δεδομένα
+        # έτσι ώστε να εκτυπώσει τα charts και να υπολογίσει τα στατιστικά            
+        st.stop()            
+            
+    # Δημιουργεί 5 στήλες (σαν containers) στα οποία χωρίζεται η οθόνη
+    c1, c2, c3, c4, c5 = st.columns(5)
+    # Customize τα metrics τα οποία εμφανίζονται στο dashboard
+    # !important βάζει σε προτεραίοτητα την συγκεκριμένη εντολή έναντι οποιαδήποτε άλλης
+    # η οποία εφαρμόζεται σε αυτό το στοιχείο
+
+    st.markdown("""
+                <style>
+                    [data-testid="stMetricLabel"] p {
+                        font-size:15px !important;
+                        text-transform: capitalize;
+                        
+                    }
+                </style>
+                """
+                , unsafe_allow_html=True)
+
+    # METRICS
+    with c1:
+        with st.container(border=True):
+            st.metric(label = f"Gross profit {current_year}", value = f"{database.get_total_gross_profit_year(current_year):,.2f}€", delta=utils.calculate_percentage_difference_year_to_year(database.get_total_gross_profit_year), format="percent", delta_description="vs. last year")
+    with c2:
+        with st.container(border=True):
+            st.metric(label = f"Net profit {current_year}", value = f"{database.get_total_net_profit_of_a_year(current_year):,.2f}€", delta=utils.calculate_percentage_difference_year_to_year(database.get_total_net_profit_of_a_year), delta_description="vs. last year", format="percent")
+    with c3:
+        with st.container(border=True):
+            st.metric(label = f"Total Cost & Losses {current_year}", value = f"{database.get_total_losses_year(current_year)+database.get_total_costs_year(current_year):,.2f}€", format="percent", delta=utils.calculate_percentage_difference_year_to_year(database.get_cost_losses_year), delta_description="vs. last year", delta_color="inverse")
+    with c4:
+        with st.container(border=True):
+            st.metric(label = f"Total losses {current_year}", value = f"{database.get_total_losses_year(current_year):,.2f}€")
+    with c5:
+        with st.container(border=True):
+            st.metric(label = f"Total costs {current_year}", value = f"{database.get_total_costs_year(current_year):,.2f}€")
+   
+
+    # Κάτω από τα metrics η οριζόντια γραμμή
+    st.divider()    
             
 
     col1, col2 = st.columns(2)
 
     # Tα δεδομένα της παρακάτω εντολής είναι σε μορφή : [('.', '.'), ('.', '.'), ('.', '.')]
     gross_profit_for_each_month = database.get_gross_profits_each_month_of_a_year(current_year)
+    
+    # GROSS PROFIT IS 0 
+    if not gross_profit_for_each_month:
+        st.toast(body=" Gross profit for the current year is 0", icon="⚠️", duration="infinite")
+        
     # Για να μετατρέψω την παραπάνω λίστα σε 2 μοναδικές λίστες αρκεί
     # να πάρω το πρώτο και δεύτερο στοιχείο από το κάθε tuple και να το προσθέσω σε 
     # κάθε λίστα αντίστοιχα
@@ -460,12 +491,18 @@ def render_dashboard():
     profit = [f"{element:.2f}" for element in profit]
 
     total_costs_losses_each_month = database.get_cost_losses_each_month_of_a_year(current_year)
+    
+    # COSTS & LOSSES ARE 0
+    if not total_costs_losses_each_month:
+        st.toast(body=" Costs&Losses for the current year are 0", icon="⚠️", duration="infinite")
+        st.stop()
+    
     months2 = [calendar.month_abbr[int(element[0])] for element in total_costs_losses_each_month]
     cost_losses = [element[1] for element in total_costs_losses_each_month]
     cost_losses = [f"{element:.2f}" for element in cost_losses]
-
+    
     # Bar chart για gross profits per month
-
+    
     with col1:
         with st.container(border=True):
             st.subheader("Profits per month (Gross)")
@@ -483,8 +520,10 @@ def render_dashboard():
             bar.update_traces(textposition="outside",  marker_cornerradius=10, textfont_size=15)
             st.plotly_chart(bar)
 
-    # Bar chart για cost&losses per month
-    #         
+    
+    
+
+    # Bar chart για cost&losses per month         
     with col2:
         with st.container(border=True):
             st.subheader("Costs & Losses per month")
@@ -1006,11 +1045,14 @@ def render_earnings():
                 height=650,
                 disabled=list(dataframe_earnings.columns.values),
                 column_config={
-                                "DATE" : st.column_config.DateColumn(format="localized"),
-                                "ID" : None
+                                "DATE" : st.column_config.DateColumn(format="DD/MM/YYYY"),
+                                "ID" : None,
+                                "ROI": st.column_config.ProgressColumn(min_value=0, max_value=100)
                             }, 
                 hide_index=True, column_order=['DATE', 'CATEGORY', 'PROFIT', 'DESCRIPTION', 'ROI', 'NOTES']
             )
+
+
             deleted_ids = set(dataframe_earnings['ID'].to_list()) - set(edited_df['ID'].to_list())
             if deleted_ids:
                 for id in deleted_ids:
@@ -1319,11 +1361,11 @@ def render_earnings():
                 st.session_state.annualized_roi = annualized_roi
             # Pop up μηνύματα σε περίπτωση όπου ο χρήστης δεν έχει εισχωρήσει σωστά τα δεδομένα 
             elif submitted and amount_invested == 0.0:
-                st.toast(body=" Amount Invested must be greater than zero!", icon="⚠️", duration="short")
+                st.toast(body=" Amount Invested must be greater than zero!", icon="⚠️", duration="infinite")
             elif submitted and time_length == 0.0:
-                st.toast(body=" Investment Length must be greater or equal to 1.0", icon="⚠️", duration="short")
+                st.toast(body=" Investment Length must be greater or equal to 1.0", icon="⚠️", duration="infinite")
             elif submitted and (last_date < starting_date):
-                st.toast(body=" The 'To' date cannot be before the 'From' date!", icon="⚠️", duration="short")
+                st.toast(body=" The 'To' date cannot be before the 'From' date!", icon="⚠️", duration="infinite")
 
             # Αποτέλεσματα
             if st.session_state.net_profit != None: 
@@ -1367,7 +1409,7 @@ def render_earnings():
             if st.session_state.calc_res != None:
                 st.metric(label="Result", value=f"{st.session_state.calc_res:,.2f}", border=True, width=200)
             if submitted and func_choice == None:
-                st.toast(body="Select a calculation method...",  icon="⚠️", duration="short")
+                st.toast(body="Select a calculation method...",  icon="⚠️", duration="infinite")
     
 
             
@@ -1489,7 +1531,7 @@ def render_investments():
         if isinstance(total_port_value, float):
                 st.metric("Total amount invested", f"{database.get_sum_investments():,.2f}€", border=True)
         else:
-            st.toast(f"{total_port_value}", icon="⚠️", duration="short")
+            st.toast(f"{total_port_value}", icon="⚠️", duration="infinite")
     st.divider()
 
     # Line chart για Portofolio Value

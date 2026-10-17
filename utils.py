@@ -7,57 +7,62 @@ current_year = datetime.now().year
 
 
 def calculate_percentage_difference_year_to_year(func):
-    # Τύπος για υπολογισμός διαφοράς ποσοστού : ((new value - old value) / old value) * 100
+    # Τύπος για υπολογισμός διαφοράς ποσοστού : ((new value - old value) / abs(old value)) * 100
     # Δεν πολλαπλασίαζω με το 100 διότι το κάνει αυτόματα η st.metric 
     current_value = func(current_year)
     past_value = func(current_year - 1)
+    
     # Σε περίπτωση που είναι άδεια η βάση δεδομένων
     if past_value == 0:
         return None
-    percentage_diff = ((current_value - past_value) / past_value)
+    percentage_diff = ((current_value - past_value) / abs(past_value))
     return percentage_diff
 
 
 def calculate_percentage_difference_for_gross_profit():
-    # Τύπος για υπολογισμός διαφοράς ποσοστού : ((new value - old value) / old value) * 100
+    # Τύπος για υπολογισμός διαφοράς ποσοστού : ((new value - old value) / abs(old value)) * 100
     # Δεν πολλαπλασίαζω με το 100 διότι το κάνει αυτόματα η st.metric 
     current_value = database.get_total_gross_profit_year()
-    past_value = database.get_gross_profit_except_current_year()
+    print(current_value)
+    past_value = database.get_gross_profit_except_current_year(current_year)
+    print(past_value)
     if past_value == 0:
-        return None
-    percentage_diff = ((current_value - past_value) / past_value)
+        return 0
+    percentage_diff = ((current_value - past_value) / abs(past_value))
     return percentage_diff
 
 def calculate_percentage_difference_for_net_profit():
-    # Τύπος για υπολογισμός διαφοράς ποσοστού : ((new value - old value) / old value) * 100
+    # Τύπος για υπολογισμός διαφοράς ποσοστού : ((new value - old value) / abs(old value)) * 100
     # Δεν πολλαπλασίαζω με το 100 διότι το κάνει αυτόματα η st.metric 
     current_value = database.get_total_net_profit_of_a_year()
+    print(current_value)
     past_value = database.get_total_net_profit_except_current_year(current_year)
+    print(past_value)
     if past_value == 0:
-        return None
-    percentage_diff = ((current_value - past_value) / past_value)
+        return 0
+    percentage_diff = ((current_value - past_value) / abs(past_value))
     return percentage_diff
 
 
 
 def calculate_percentage_difference_for_costs():
-    # Τύπος για υπολογισμός διαφοράς ποσοστού : ((new value - old value) / old value) * 100
+    # Τύπος για υπολογισμός διαφοράς ποσοστού : ((new value - old value) / abs(old value)) * 100
     # Δεν πολλαπλασίαζω με το 100 διότι το κάνει αυτόματα η st.metric 
     current_value = database.get_total_costs_year()
     past_value = database.get_total_costs_except_current_year(current_year)
     if past_value == 0:
         return None
-    percentage_diff = ((current_value - past_value) / past_value)
+    percentage_diff = ((current_value - past_value) / abs(past_value))
     return percentage_diff
 
 def calculate_percentage_difference_for_losses():
-    # Τύπος για υπολογισμός διαφοράς ποσοστού : ((new value - old value) / old value) * 100
+    # Τύπος για υπολογισμός διαφοράς ποσοστού : ((new value - old value) / abs(old value)) * 100
     # Δεν πολλαπλασίαζω με το 100 διότι το κάνει αυτόματα η st.metric 
     current_value = database.get_total_losses_year()
     past_value = database.get_total_losses_except_current_year(current_year)
     if past_value == 0:
         return None
-    percentage_diff = ((current_value - past_value) / past_value)
+    percentage_diff = ((current_value - past_value) / abs(past_value))
     return percentage_diff
 
 def calculate_percentage_difference_for_costs_and_losses():
@@ -182,11 +187,11 @@ def add_template_row(dataframe, table):
             "DESCRIPTION": "your description",
             "ROI" :0,
             "NOTES": "your notes",
-            "DATE": "dd-mm-yyyy"
+            "DATE": "yyyy/mm/dd"
         })
     elif table == "costs":
         new_row = pd.Series({ 
-            "DATE": "dd-mm-yyyy",
+            "DATE": "yyyy/mm/dd",
             "COST": 0.0,
             "DESCRIPTION": "your description",
             "CATEGORY": "your category",
@@ -198,13 +203,13 @@ def add_template_row(dataframe, table):
             "CATEGORY": "your category",
             "LOSS": 0.0,
             "DESCRIPTION": "your description", 
-            "DATE": "dd-mm-yyyy",
+            "DATE": "yyyy/mm/dd",
             "NOTES": "your notes"
             
         })
     elif table == "investments":
         new_row = pd.Series({
-            "DATE": "dd-mm-yyyy",
+            "DATE": "yyyy/mm/dd",
             "ENTRY": 0.0,
             "DESCRIPTION": "your description", 
             "AMOUNT": 0,
@@ -219,7 +224,7 @@ def add_template_row(dataframe, table):
             "DESCRIPTION": "your description",
             "ROI" :0,
             "NOTES": "your notes",
-            "DATE": "dd-mm-yyyy",
+            "DATE": "yyyy/mm/dd",
             "IMMEDIATE_TRANSFER": 1
         })        
 
@@ -255,4 +260,4 @@ def download_csv(table):
     return dataframe
 
 if __name__=='__main__':
-    print(get_earnings())
+    print(calculate_percentage_difference_for_gross_profit())

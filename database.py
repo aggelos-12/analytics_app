@@ -86,7 +86,7 @@ def drop_table(table_name):
 
 
 
-# Στην περίπτωη όπου στο call δεν περαστεί κάποια παράμετρος
+# Στην περίπτωση όπου στο call δεν περαστεί κάποια παράμετρος
 # επιστρέφει το συνολικό gross profit
 # διαφορετικά επιστρέφει το gross profit μόνο ενός χρόνου
 def get_total_gross_profit_year(year=None):
@@ -148,19 +148,20 @@ def get_gross_profit_each_year():
     return data
 
 # Επιστρέφει τo συνολικό gross profit, χωρίς να συμπεριλιφθεί αυτό του φετινού χρόνου
-def get_gross_profit_except_current_year():
+def get_gross_profit_except_current_year(current_year):
     connection = get_connection()
     cursor = connection.cursor()
+    
     query = """
         SELECT SUM(PROFIT) FROM EARNINGS
-        WHERE DATE NOT LIKE '2026%'
+        WHERE STRFTIME('%Y',DATE) != ?
     """
-    cursor.execute(query)
+    cursor.execute(query, (f"{current_year}",))
     data = cursor.fetchone()
     if data == None or data[0] == None:
         return 0
     else:
-        return data[0] + 532.98
+        return data[0]
 
 
 
@@ -189,10 +190,10 @@ def get_total_costs_except_current_year(current_year):
     cursor = connection.cursor()
     query = """
         SELECT SUM(COST) FROM COSTS
-        WHERE DATE NOT LIKE ?
+        WHERE STRFTIME('%Y', DATE) != ?
     """
     
-    cursor.execute(query, (f"{current_year}%",))
+    cursor.execute(query, (f"{current_year}",))
     data = cursor.fetchone()
     if data == None or data[0] == None:
         return 0
@@ -222,10 +223,10 @@ def get_total_losses_except_current_year(current_year):
     cursor = connection.cursor()
     query = """
         SELECT SUM(LOSS) FROM LOSSES
-        WHERE DATE NOT LIKE ?
+        WHERE STRFTIME('%Y', DATE) != ?
     """
     
-    cursor.execute(query, (f"{current_year}%",))
+    cursor.execute(query, (f"{current_year}",))
     data = cursor.fetchone()
     if data == None or data[0] == None:
         return 0
@@ -556,7 +557,7 @@ def get_investments_currencies():
 def add_cost_entry(date, cost, description, category, notes):
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute('INSERT INTO COSTS (DATE, COST, DESCRIPTION, CATEGORY, NOTES) VALUES (?,?,?,?,?)', (date, cost, description, category, notes))
+    cursor.execute('INSERT INTO COSTS (DATE, COST, DESCRIPTION, CATEGORY, NOTES) VALUES (?,?,?,UPPER(?),?)', (date, cost, description, category, notes))
     connection.commit()
     connection.close()
 
@@ -566,7 +567,7 @@ def add_cost_entry(date, cost, description, category, notes):
 def add_earning_entry(category, profit, description, roi, notes, date):
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute('INSERT INTO EARNINGS (CATEGORY, PROFIT, DESCRIPTION, ROI, NOTES, DATE) VALUES (?, ?, ?, ?, ?, ?)', (category, profit, description, roi, notes, date))
+    cursor.execute('INSERT INTO EARNINGS (CATEGORY, PROFIT, DESCRIPTION, ROI, NOTES, DATE) VALUES (UPPER(?), ?, ?, ?, ?, ?)', (category, profit, description, roi, notes, date))
     connection.commit()
     connection.close()
 
@@ -574,7 +575,7 @@ def add_earning_entry(category, profit, description, roi, notes, date):
 def add_pending_earning_entry(category, profit, description, roi, notes, date, immediate_transfer):
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute('INSERT INTO PENDING_EARNINGS (CATEGORY, PROFIT, DESCRIPTION, ROI, NOTES, DATE, IMMEDIATE_TRANSFER) VALUES (?, ?, ?, ?, ?, ?, ?)', (category, profit, description, roi, notes, date, immediate_transfer))
+    cursor.execute('INSERT INTO PENDING_EARNINGS (CATEGORY, PROFIT, DESCRIPTION, ROI, NOTES, DATE, IMMEDIATE_TRANSFER) VALUES (UPPER(?), ?, ?, ?, ?, ?, ?)', (category, profit, description, roi, notes, date, immediate_transfer))
     connection.commit()
     connection.close()
 
@@ -590,7 +591,7 @@ def add_investment_entry(date, entry, description, amount, currency, account, pl
 def add_loss_entry(category, loss, description, date, notes):
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute('INSERT INTO LOSSES (CATEGORY, LOSS, DESCRIPTION, DATE, NOTES) VALUES (?, ?, ?, ?, ?)', (category, loss, description, date, notes))
+    cursor.execute('INSERT INTO LOSSES (CATEGORY, LOSS, DESCRIPTION, DATE, NOTES) VALUES (UPPER(?), ?, ?, ?, ?)', (category, loss, description, date, notes))
     connection.commit()
     connection.close()
      
@@ -634,13 +635,28 @@ def delete_investment_entry(id):
     connection.commit()
     connection.close()
 
+def delete_all_earnings_entry():
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("DELETE FROM EARNINGS WHERE ID > 1")
+    connection.commit()
+    connection.close()
 
+def delete_all_costs_entry():
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("DELETE FROM COSTS WHERE ID > 1")
+    connection.commit()
+    connection.close()
 
 
 
 
 if __name__ == "__main__":
-    delete_investment_entry(1)
-    delete_investment_entry(2)
-    print(get_investments_currencies())
+    delete_all_costs_entry()
+    #print(get_total_costs_year(2026))
+    delete_all_earnings_entry()
+    print(get_gross_profit_except_current_year(2026))
+    #delete_cost_entry(5)
+    #print(get_investments_currencies())
 
