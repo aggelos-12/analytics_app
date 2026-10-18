@@ -179,6 +179,10 @@ def get_categories(func):
     return data_categories
 
 
+#def merge_costs_and_losses():
+
+    
+
 def add_template_row(dataframe, table):
     if table == "earnings":
         new_row = pd.Series({ 
@@ -260,4 +264,4 @@ def download_csv(table):
     return dataframe
 
 if __name__=='__main__':
-    print(calculate_percentage_difference_for_gross_profit())
+    print(get_losses_or_costs("losses"))

@@ -80,6 +80,78 @@ st.markdown(
 ,unsafe_allow_html=True)
 
 
+# Customize upload button global
+st.markdown("""
+    <style>
+
+        /* εξατόμικευση upload button global */
+        .st-key-upload-button-global {
+            display: flex !important;
+            margin-left:38%;
+                            
+        }
+
+        /* εξατόμικευση θέσης-μεγέθους */
+        .st-key-upload-button-global [data-testid="stFileUploader"] {
+            margin-left: 33%; 
+            height: 0px !important;
+            background-color: blue !important;
+            
+        }
+                
+        .st-key-upload-button-global label{
+            display:none !important;
+        }
+
+        /* εξατομίκεση button (section) */
+        .st-key-upload-button-global section{
+            background-color: transparent !important;
+            display: flex !important; 
+            height: 0px !important;
+            margin-top: 11%;
+        }
+
+        /* αφαίρεση instruction (200 MB etc) */
+        [data-testid=stFileUploaderDropzoneInstructions] > div span{ 
+            display: none;
+        }
+
+        /* εξατομίκεση κουμπιού */
+        div.st-key-upload-button-global [data-testid="stFileUploaderDropzone"] button {
+            margin-left: 10%;
+            font-weight: 500;
+            background-color: #151E2A !important;
+            box-shadow: none !important;
+            
+        }
+        
+        
+        /* εξατομίκεση κουμπιού σε state hover */
+        div.st-key-upload-button-global [data-testid="stFileUploaderDropzone"] button:hover {
+            margin-left: 10%;
+            color: white;
+            background-color: #151E2A !important;    
+        }
+
+        
+
+        /* εξατομίκεση κειμένου μέσα στο κουμπί σε state hover */
+        div.st-key-upload-button-global [data-testid="stFileUploaderDropzone"] button:hover div  {
+            animation: textScale 0.2s forwards;
+        }
+
+        @keyframes textScale {
+            from {
+                transform: scale(1);
+            }
+            to {
+                transform: scale(1.07);
+            }
+        }
+    </style>
+""",unsafe_allow_html=True)
+
+
 # ================================================================
 
 #                           SIDEBAR
@@ -287,7 +359,134 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
 
-  
+
+# upload button 
+def upload_button():
+    return st.file_uploader("", type="csv",  key="upload-button-global", accept_multiple_files=True)
+
+
+# upload file container  
+def upload_file_container():
+# Customize το upload file div
+    st.markdown("""
+        <style>
+
+            div[data-testid="stVerticalBlockBorderWrapper"] {
+                background-color: #151D29;
+                border: 1px solid rgba(41, 181, 232, 0.25);
+                border-radius: 16px;
+                padding: 24px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            }
+                
+            .upload_icon {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-bottom: 20px;
+            }
+
+            .card-title {
+                color: #FFFFFF;
+                font-size: 26px;
+                font-weight: 700;
+                text-align: center;
+                margin-bottom: 10px;
+                line-height: 1.3;
+            }
+
+            .card-subtitle {
+                color: #9499B3;
+                font-size: 14px;
+                text-align: center;
+                margin-bottom: 25px;
+                line-height: 1.5;
+            }
+
+                
+            
+        </style>
+    """,unsafe_allow_html=True,)
+
+
+    _, center_col, _ = st.columns([1, 2, 1])
+
+    with center_col:
+        # μπλέ container
+        with st.container(border=True, key="upload-container"):
+                
+            st.markdown("""
+                <!-- μπλέ container το οποίο πειλαμβάνει όλα τα υπόλοιπα elements -->
+                <div class="upload_icon">
+                    <!-- upload file icon -->
+                    <svg width="68" height="68" viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0px 0px 18px rgba(120, 119, 240, 0.5));">
+                        <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <path d="M12 18V12" />
+                        <path d="M9 15L12 12L15 15" />
+                    </svg>
+                </div>
+                <!-- Title div -->
+                <div class="card-title">Welcome to Your Analytics Dashboard</div>
+                <!-- Subheader div -->
+                <div class="card-subtitle">
+                    <span>To get started, please upload your data file (CSV) below.</span>
+                    <p>(required costs and earnings CSV)</p>
+                    <p>Download a template to get started, fill in your figures, and upload the file.</p>
+                </div>
+
+                <style>
+
+                /* εξατομίκευση μπλέ container */
+                .st-key-upload-container {
+                    background-color: #151D29 !important;
+                    display: flex;
+                    border: 1px solid rgba(41, 181, 232, 0.3) !important;
+                    border-radius: 16px !important;
+                    padding: 24px !important;
+                    justify-content: center;
+                }
+                /* εξατόμικευση upload button */
+                .st-key-upload-button {
+                    justify-content: center !important;
+                    align-items: center !important;
+                             
+                }
+                        
+                .st-key-upload-button label{
+                    display:none !important;
+                }
+
+                .st-key-upload-button section {
+                    background-color: #151D29 !important;           
+                }
+
+                /* εξατόμικευση div στο οποίο περικλείετε το upload button */
+                div.st-key-upload-button { 
+                    display:flex;
+                    text-align:center;
+                    justify-content: center;
+                }
+                </style>
+                    
+            """,unsafe_allow_html=True,)
+
+            # upload button
+            uploaded_file = st.file_uploader("", type=["csv"], key="upload-button", accept_multiple_files=True)
+                
+            for file in uploaded_file:
+                dataframe = pd.read_csv(file)
+                    
+                # Για κάθε CSV το κάνω format με το module loader
+                # ανάλογα με το text το οποίο επιστραφεί εμφανίζεται το αντίστοιχο μήνυμα
+                result = loader.add_to_database(dataframe)
+                # Περίπτωση όπου τα δεδομένα δεν είναι σωστά
+                if result != "data has been added":
+                    st.error(body=result)            
+                else:
+                    
+                    st.success("Data has been added successfully")
+
 
 # ================================================================
 
@@ -298,141 +497,26 @@ with st.sidebar:
 
 
 
+
     
 def render_dashboard():
-    st.title("Dashboard")
+
+    mainc1, _ ,mainc3 = st.columns(3)
+    with mainc1:
+        st.title("Dashboard")
     
  
     # Περίπτωση όπου οι πίνακες earnings και costs είναι κενοί
     if utils.get_earnings().empty or utils.get_losses_or_costs("costs").empty:
-        st.markdown("""
-            <style>
-
-                div[data-testid="stVerticalBlockBorderWrapper"] {
-                    background-color: #151D29;
-                    border: 1px solid rgba(41, 181, 232, 0.25);
-                    border-radius: 16px;
-                    padding: 24px;
-                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-                }
-                
-                .upload_icon {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    margin-bottom: 20px;
-                }
-
-                
-                .card-title {
-                    color: #FFFFFF;
-                    font-size: 26px;
-                    font-weight: 700;
-                    text-align: center;
-                    margin-bottom: 10px;
-                    line-height: 1.3;
-                }
-
-                .card-subtitle {
-                    color: #9499B3;
-                    font-size: 14px;
-                    text-align: center;
-                    margin-bottom: 25px;
-                    line-height: 1.5;
-                }
-
-                
-                div[data-testid="stFileUploader"] {
-                    width: 100%;
-                    max-width: 420px;
-                    margin: 0 auto;
-                }
-            </style>
-        """,unsafe_allow_html=True,)
-
-
-        _, center_col, _ = st.columns([1, 2, 1])
-
-        with center_col:
-            # μπλέ container
-            with st.container(border=True, key="upload-container"):
-                
-                st.markdown("""
-                    <!-- μπλέ container το οποίο πειλαμβάνει όλα τα υπόλοιπα elements -->
-                    <div class="upload_icon">
-                        <!-- upload file icon -->
-                        <svg width="68" height="68" viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0px 0px 18px rgba(120, 119, 240, 0.5));">
-                            <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" />
-                            <polyline points="14 2 14 8 20 8" />
-                            <path d="M12 18V12" />
-                            <path d="M9 15L12 12L15 15" />
-                        </svg>
-                    </div>
-                    <!-- Title div -->
-                    <div class="card-title">Welcome to Your Analytics Dashboard</div>
-                    <!-- Subheader div -->
-                    <div class="card-subtitle">
-                        <span>To get started, please upload your data file (CSV) below.</span>
-                        <p>(required costs and earnings CSV)</p>
-                        <p>Download a template to get started, fill in your figures, and upload the file.</p>
-                    </div>
-
-                    <style>
-
-                        /* εξατομίκευση μπλέ container */
-                        .st-key-upload-container {
-                            background-color: #151D29 !important;
-                            border: 1px solid rgba(41, 181, 232, 0.3) !important;
-                            border-radius: 16px !important;
-                            padding: 24px !important;
-                        }
-                        /* εξατόμικευση upload button */
-                        .st-key-upload-button {
-                            display: flex !important;
-                            margin-left:38%;
-                            
-                        }
-                        
-                        .st-key-upload-button label{
-                            display:none !important;
-                        }
-
-                        .st-key-upload-button section {
-                            background-color: #151D29 !important;
-                            display: flex !important;
-                            
-                        }
-
-                        .st-key-upload-button button{
-                            margin-left:10%;
-                        }
-
-                        
-                    </style>
-                    
-                    """,unsafe_allow_html=True,)
-
-                # upload button
-                uploaded_file = st.file_uploader("", type=["csv"], width=180, key="upload-button", accept_multiple_files=True)
-                
-                for file in uploaded_file:
-                    dataframe = pd.read_csv(file)
-                    
-                    # Για κάθε CSV το κάνω format με το module loader
-                    # ανάλογα με το text το οποίο επιστραφεί εμφανίζεται το αντίστοιχο μήνυμα
-                    result = loader.add_to_database(dataframe)
-                    # Περίπτωση όπου τα δεδομένα δεν είναι σωστά
-                    if result != "data has been added":
-                        st.error(body=result)
-                        
-                    else:
-                    
-                        st.success("Data has been added successfully")
+        upload_file_container()
                    
         # σταματάει το πρόγραμμα εδώ εφόσον δεν έχει τα απαρραίτητα δεδομένα
         # έτσι ώστε να εκτυπώσει τα charts και να υπολογίσει τα στατιστικά            
         st.stop()            
-            
+
+    with mainc3:
+        uploaded_file = upload_button()
+
     # Δημιουργεί 5 στήλες (σαν containers) στα οποία χωρίζεται η οθόνη
     c1, c2, c3, c4, c5 = st.columns(5)
     # Customize τα metrics τα οποία εμφανίζονται στο dashboard
@@ -681,8 +765,18 @@ def toggle_button_label():
 
 def render_costs_losses():
     
+    mainc1, _ ,mainc3 = st.columns(3)
+    with mainc1:
+        st.title("Costs & Losses")
 
-    st.title("Costs & Losses")
+    # Περίπτωση όπου οι πίνακες costs και losses είναι κενοί 
+    if not(database.get_costs() or database.get_losses()):
+        upload_file_container()
+        st.stop()
+
+    with mainc3:
+        uploaded_file = upload_button()
+
     c1, c2 = st.columns([6, 1.5], vertical_alignment="bottom")
     
     with c1:
@@ -841,6 +935,7 @@ def render_costs_losses():
                 width="stretch",
                 horizontal=True, 
             )
+
     
                 
 

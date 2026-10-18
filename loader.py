@@ -9,7 +9,7 @@ def add_to_database(dataframe):
     table_schema = { 
         "costs": ["DATE", "COST", "DESCRIPTION", "CATEGORY", "NOTES"],
         "earnings": ["CATEGORY", "PROFIT", "DESCRIPTION", "ROI", "NOTES", "DATE"],
-        "investments": ["DATE", "ENTRY", "DESCRIPTION", "AMOUNT", "CURRENCY", "ACCOUNT", "PLATFORM"],
+        "investments": ["DATE", "ENTRY", "DESCRIPTION", "AMOUNT", "CURRENCY", "PLATFORM", "ACCOUNT"],
         "losses": ["CATEGORY", "LOSS", "DESCRIPTION", "DATE", "NOTES"],
         "pearnings": ["CATEGORY", "PROFIT", "DESCRIPTION", "ROI", "NOTES", "DATE", "IMMEDIATE_TRANSFER"]
     }
@@ -31,11 +31,11 @@ def add_to_database(dataframe):
         "LOSS": "numeric",
         "IMMEDIATE_TRANSFER": "bool"
     }
+
     # Αποθηκεύω τα ονόματα των στηλών του dataframe
     columns_names = list(dataframe.columns)
 
-    # Για κάθε blueprint πίνακα έλεγχω αν το dataframe ταιριάζει με ένα
-    # από αυτά
+    # Για κάθε blueprint πίνακα έλεγχω αν το dataframe ταιριάζει με ένα από αυτά
     for table in table_schema:
         # Έλεγχω αν η σειρά των στηλών είναι όπως στα schemas
         if table_schema[table] == columns_names:
@@ -48,13 +48,14 @@ def add_to_database(dataframe):
                 if columns_dtypes[column] == "numeric":
                     converted_column = pd.to_numeric(dataframe[column], errors="coerce")
                     dataframe[column] = converted_column
-                    #print("numeric")
+                    # η στήλη δεν περιείχε αριθμό
                     if converted_column.isna().any():
                         return f"Invalid format in column '{column}'. Please check your values."
                         
                 elif columns_dtypes[column] == "date":
                     converted_column = pd.to_datetime(dataframe[column], errors="coerce", format="%Y/%m/%d").dt.date
                     dataframe[column] = converted_column.astype(str)
+                    # η στήλη δεν περιείχε formated ημερομηνία
                     if converted_column.isna().any():
                         return f"Invalid format in column '{column}'. Please check your values."
                          
@@ -78,6 +79,13 @@ def add_to_database(dataframe):
             elif table == "earnings":
                 for row in dataframe.itertuples(index=False):
                     database.add_earning_entry(row[0], row[1], row[2], row[3], row[4], row[5])
+            elif table == "investments":
+                for row in dataframe.itertuples(index=False): 
+                    database.add_investment_entry(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+            elif table == "losses":
+                for row in dataframe.itertuples(index=False): 
+                    database.add_loss_entry(row[0], row[1], row[2], row[3], row[4])
+            
             break
     return "data has been added"        
            

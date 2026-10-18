@@ -649,14 +649,21 @@ def delete_all_costs_entry():
     connection.commit()
     connection.close()
 
-
+def delete_all_investments_entry():
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("DELETE FROM INVESTMENTS WHERE ID > 1")
+    connection.commit()
+    connection.close()
 
 
 if __name__ == "__main__":
+    #print(get_losses())
     delete_all_costs_entry()
     #print(get_total_costs_year(2026))
     delete_all_earnings_entry()
-    print(get_gross_profit_except_current_year(2026))
+    #delete_all_investments_entry()
+    #print(get_gross_profit_except_current_year(2026))
     #delete_cost_entry(5)
     #print(get_investments_currencies())
 
