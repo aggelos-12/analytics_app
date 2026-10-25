@@ -2,7 +2,8 @@ import sqlite3
 import requests
 from datetime import datetime
 import os
-
+import streamlit as st
+import pandas as pd
 
 # Αρχικοποίηση βάσης δεδομένων
 def initialize_database():
@@ -89,6 +90,7 @@ def drop_table(table_name):
 # Στην περίπτωση όπου στο call δεν περαστεί κάποια παράμετρος
 # επιστρέφει το συνολικό gross profit
 # διαφορετικά επιστρέφει το gross profit μόνο ενός χρόνου
+@st.cache_data(show_spinner=False)
 def get_total_gross_profit_year(year=None):
     # άνοιξε το connection με την βάση δεδομένων
     connection = get_connection()
@@ -116,6 +118,7 @@ def get_total_gross_profit_year(year=None):
 
 
 # Επιστρέφει το gross profit για κάθε μήνα ενός χρόνου
+@st.cache_data(show_spinner=False)
 def get_gross_profits_each_month_of_a_year(year):
     connection = get_connection()
     cursor = connection.cursor()
@@ -134,6 +137,7 @@ def get_gross_profits_each_month_of_a_year(year):
 
 
 # Επιστρέφει το gross profit για κάθε χρόνο
+@st.cache_data(show_spinner=False)
 def get_gross_profit_each_year():
     connection = get_connection()
     cursor = connection.cursor()
@@ -148,6 +152,7 @@ def get_gross_profit_each_year():
     return data
 
 # Επιστρέφει τo συνολικό gross profit, χωρίς να συμπεριλιφθεί αυτό του φετινού χρόνου
+@st.cache_data(show_spinner=False)
 def get_gross_profit_except_current_year(current_year):
     connection = get_connection()
     cursor = connection.cursor()
@@ -169,6 +174,7 @@ def get_gross_profit_except_current_year(current_year):
 # Στην περίπτωση όπου στο call δεν περαστεί κάποια παράμετρος
 # επιστρέφει το συνολικό κόστος
 # διαφορετικά επιστρέφει τα κόστη μόνο ενός χρόνου
+@st.cache_data(show_spinner=False)
 def get_total_costs_year(year=None):
     connection = get_connection()
     cursor = connection.cursor()
@@ -184,6 +190,7 @@ def get_total_costs_year(year=None):
 
 
 # Επιστρέφει τo συνολικό  κόστος, χωρίς να συμπεριλιφθεί αυτό του φετινού χρόνου
+@st.cache_data(show_spinner=False)
 def get_total_costs_except_current_year(current_year):
     
     connection = get_connection()
@@ -204,6 +211,7 @@ def get_total_costs_except_current_year(current_year):
 # Στην περίπτωση όπου στο call δεν περαστεί κάποια παράμετρος
 # επιστρέφει το συνολικό loss
 # διαφορετικά επιστρέφει τα losses μόνο ενός χρόνου
+@st.cache_data(show_spinner=False)
 def get_total_losses_year(year=None):
     connection = get_connection()
     cursor = connection.cursor()
@@ -218,6 +226,7 @@ def get_total_losses_year(year=None):
     return total_losses
 
 # Επιστρέφει τo συνολικό loss, χωρίς να συμπεριλιφθεί αυτό του φετινού χρόνου
+@st.cache_data(show_spinner=False)
 def get_total_losses_except_current_year(current_year):
     connection = get_connection()
     cursor = connection.cursor()
@@ -235,6 +244,7 @@ def get_total_losses_except_current_year(current_year):
 
 
 # Επιστρέφει τα costs&losses (συνολικά) για κάθε χρόνο
+@st.cache_data(show_spinner=False)
 def get_cost_losses_each_year():
     connection = get_connection()
     cursor = connection.cursor()
@@ -259,6 +269,7 @@ def get_cost_losses_each_year():
     return data
 
 # Επιστρέφει τα costs&losses για έναν χρόνο
+@st.cache_data(show_spinner=False)
 def get_cost_losses_year(year):
     connection = get_connection()
     cursor = connection.cursor()
@@ -285,6 +296,7 @@ def get_cost_losses_year(year):
     
     
 # Επιστρέφει τα costs&losses για κάθε μήνα ενός χρόνου
+@st.cache_data(show_spinner=False)
 def get_cost_losses_each_month_of_a_year(year):
     connection = get_connection()
     cursor = connection.cursor()
@@ -315,6 +327,7 @@ def get_cost_losses_each_month_of_a_year(year):
 
 # Επιστρέφει για κάθε χρόνο το συνολικο cost και loss
 # σε διαφορετική στήλη για το καθένα
+@st.cache_data(show_spinner=False)
 def get_cost_losses_2_columns():
     connection = get_connection()
     cursor = connection.cursor()
@@ -339,6 +352,7 @@ def get_cost_losses_2_columns():
 # Στην περίπτωση όπου στο call δεν περαστεί κάποια παράμετρος
 # επιστρέφει το συνολικό net profit
 # διαφορετικά επιστρέφει τo net profit μόνο ενός χρόνου
+@st.cache_data(show_spinner=False)
 def get_total_net_profit_of_a_year(year=None):
     if year:
         total_net_profit = get_total_gross_profit_year(year) - (get_total_losses_year(year) + get_total_costs_year(year))
@@ -347,11 +361,13 @@ def get_total_net_profit_of_a_year(year=None):
     return total_net_profit
 
 # Επιστρέφει τo συνολικό net profit, χωρίς να συμπεριλιφθεί αυτό του φετινού χρόνου
+@st.cache_data(show_spinner=False)
 def get_total_net_profit_except_current_year(current_year):
     total_net_profit = (get_total_gross_profit_year() - (get_total_losses_year() + get_total_costs_year())) - get_total_net_profit_of_a_year(current_year)
     return total_net_profit  
 
 # Επιστρέφει τo net profit για κάθε χρόνο
+@st.cache_data(show_spinner=False)
 def get_total_net_profit_of_each_year():
     connection = get_connection()
     cursor = connection.cursor()
@@ -432,8 +448,25 @@ def get_sum_investments():
         return f"Network error {error}"
 
 
+def merge_costs_and_losses():
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("""
+        SELECT CATEGORY, SUM(AMOUNT) FROM (
+        SELECT CATEGORY, SUM(COST) AS AMOUNT FROM COSTS
+        GROUP BY CATEGORY
+        UNION ALL
+        SELECT CATEGORY, SUM(LOSS) AS AMOUNT FROM LOSSES
+        GROUP BY CATEGORY
+        ) 
+        GROUP BY CATEGORY
+    """)
+    data = cursor.fetchall()
+    connection.close()
+    return data
 
 # Επιστρέφει τον πίνακα INVESTMENTS
+@st.cache_data(show_spinner=False)
 def get_investments():
     connection = get_connection()
     cursor = connection.cursor()
@@ -442,7 +475,8 @@ def get_investments():
     connection.close()
     return entries
 
-# Επιστρέφει τον πίνακα INVESTMENTS μόνο με τις στήλες DATE, ENTRY, DESCRIPTION, CURRENCY 
+# Επιστρέφει τον πίνακα INVESTMENTS μόνο με τις στήλες DATE, ENTRY, DESCRIPTION, CURRENCY
+@st.cache_data(show_spinner=False) 
 def get_investments_for_line_chart():
     connection = get_connection()
     cursor = connection.cursor()
@@ -459,6 +493,7 @@ def get_investments_for_line_chart():
 
 
 # Επιστρέφει τον πίνακα COSTS
+@st.cache_data(show_spinner=False)
 def get_costs():
     connection = get_connection()
     cursor = connection.cursor()
@@ -471,6 +506,7 @@ def get_costs():
     return data
 
 # Επιστρέφει τον πίνακα LOSSES
+@st.cache_data(show_spinner=False)
 def get_losses():
     connection = get_connection()
     cursor = connection.cursor()
@@ -481,6 +517,7 @@ def get_losses():
     return data
 
 # Επιστρέφει τον πίνακα EARNINGS
+@st.cache_data(show_spinner=False)
 def get_earnings():
     connection = get_connection()
     cursor = connection.cursor()
@@ -491,6 +528,7 @@ def get_earnings():
     return data
 
 # Επιστρέφει τον πίνακα PENDING_EARNINGS
+@st.cache_data(show_spinner=False)
 def get_pending_earnings():
     connection = get_connection()
     cursor = connection.cursor()
@@ -501,6 +539,7 @@ def get_pending_earnings():
     return data
 
 # Επιστρέφει τα categories του πίνακα PENDING_EARNINGS
+@st.cache_data(show_spinner=False)
 def get_pending_earnings_categories():
     connection = get_connection()
     cursor = connection.cursor()
@@ -510,6 +549,7 @@ def get_pending_earnings_categories():
     return data
 
 # Επιστρέφει τα categories του πίνακα EARNINGS
+@st.cache_data(show_spinner=False)
 def get_earnings_categories():
     connection = get_connection()
     cursor = connection.cursor()
@@ -520,6 +560,7 @@ def get_earnings_categories():
 
 
 # Επιστρέφει τα categories του πίνακα LOSSES
+@st.cache_data(show_spinner=False)
 def get_costs_categories():
     connection = get_connection()
     cursor = connection.cursor()
@@ -530,6 +571,7 @@ def get_costs_categories():
 
 
 # Επιστρέφει τα categories του πίνακα LOSSES
+@st.cache_data(show_spinner=False)
 def get_losses_categories():
     connection = get_connection()
     cursor = connection.cursor()
@@ -540,6 +582,7 @@ def get_losses_categories():
 
 
 # Επιστρέφει τα currencies από τον πίνακα INVESTMENTS
+@st.cache_data(show_spinner=False)
 def get_investments_currencies():
     connection = get_connection()
     cursor = connection.cursor()
@@ -553,6 +596,8 @@ def get_investments_currencies():
         return data
 
 
+
+
 # Προσθέτει νεο entry στον πίνακα cost
 def add_cost_entry(date, cost, description, category, notes):
     connection = get_connection()
@@ -560,7 +605,7 @@ def add_cost_entry(date, cost, description, category, notes):
     cursor.execute('INSERT INTO COSTS (DATE, COST, DESCRIPTION, CATEGORY, NOTES) VALUES (?,?,?,UPPER(?),?)', (date, cost, description, category, notes))
     connection.commit()
     connection.close()
-
+    st.cache_data.clear()
 
 
 # Προσθέτει νεο entry στον πίνακα earning
@@ -570,6 +615,7 @@ def add_earning_entry(category, profit, description, roi, notes, date):
     cursor.execute('INSERT INTO EARNINGS (CATEGORY, PROFIT, DESCRIPTION, ROI, NOTES, DATE) VALUES (UPPER(?), ?, ?, ?, ?, ?)', (category, profit, description, roi, notes, date))
     connection.commit()
     connection.close()
+    st.cache_data.clear()
 
 # Προσθέτει νεο entry στον πίνακα pending earning
 def add_pending_earning_entry(category, profit, description, roi, notes, date, immediate_transfer):
@@ -578,6 +624,7 @@ def add_pending_earning_entry(category, profit, description, roi, notes, date, i
     cursor.execute('INSERT INTO PENDING_EARNINGS (CATEGORY, PROFIT, DESCRIPTION, ROI, NOTES, DATE, IMMEDIATE_TRANSFER) VALUES (UPPER(?), ?, ?, ?, ?, ?, ?)', (category, profit, description, roi, notes, date, immediate_transfer))
     connection.commit()
     connection.close()
+    st.cache_data.clear()
 
 # Προσθέτει νεο entry στον πίνακα investments
 def add_investment_entry(date, entry, description, amount, currency, account, platform):
@@ -586,6 +633,7 @@ def add_investment_entry(date, entry, description, amount, currency, account, pl
     cursor.execute('INSERT INTO INVESTMENTS (DATE, ENTRY, DESCRIPTION, AMOUNT, CURRENCY, ACCOUNT, PLATFORM) VALUES (?, ?, ?, ?, ?, ?, ?)', (date, entry, description, amount, currency, account, platform))
     connection.commit()
     connection.close()
+    st.cache_data.clear()
 
 # Προσθέτει νεο entry στον πίνακα losses
 def add_loss_entry(category, loss, description, date, notes):
@@ -594,6 +642,7 @@ def add_loss_entry(category, loss, description, date, notes):
     cursor.execute('INSERT INTO LOSSES (CATEGORY, LOSS, DESCRIPTION, DATE, NOTES) VALUES (UPPER(?), ?, ?, ?, ?)', (category, loss, description, date, notes))
     connection.commit()
     connection.close()
+    st.cache_data.clear()
      
 # Διαγράφει ένα entry από τον πίνακα loss
 def delete_loss_entry(id):
@@ -602,6 +651,7 @@ def delete_loss_entry(id):
     cursor.execute('DELETE FROM LOSSES WHERE ID = ? ', (id,))
     connection.commit()
     connection.close()
+    st.cache_data.clear()
 
 # Διαγράφει ένα entry από τον πίνακα cost
 def delete_cost_entry(id):
@@ -610,6 +660,7 @@ def delete_cost_entry(id):
     cursor.execute("DELETE FROM COSTS WHERE ID = ?", (id,))
     connection.commit()
     connection.close()
+    st.cache_data.clear()
 
 # Διαγράφει ένα entry από τον πίνακα earning
 def delete_earning_entry(id):
@@ -618,6 +669,7 @@ def delete_earning_entry(id):
     cursor.execute("DELETE FROM EARNINGS WHERE ID = ?", (id,))
     connection.commit()
     connection.close()
+    st.cache_data.clear()
 
 # Διαγράφει ένα entry από τον πίνακα pending earning
 def delete_pending_earning_entry(id):
@@ -626,14 +678,16 @@ def delete_pending_earning_entry(id):
     cursor.execute("DELETE FROM PENDING_EARNINGS WHERE ID = ?", (id,))
     connection.commit()
     connection.close()
+    st.cache_data.clear()
 
 # Διαγράφει ένα entry από τον πίνακα investments
 def delete_investment_entry(id):
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute("DELETE FROM EARNINGS WHERE ID = ?", (id,))
+    cursor.execute("DELETE FROM INVESTMENTS WHERE ID = ?", (id,))
     connection.commit()
     connection.close()
+    st.cache_data.clear()
 
 def delete_all_earnings_entry():
     connection = get_connection()
@@ -641,6 +695,7 @@ def delete_all_earnings_entry():
     cursor.execute("DELETE FROM EARNINGS WHERE ID > 1")
     connection.commit()
     connection.close()
+    st.cache_data.clear()
 
 def delete_all_costs_entry():
     connection = get_connection()
@@ -648,6 +703,7 @@ def delete_all_costs_entry():
     cursor.execute("DELETE FROM COSTS WHERE ID > 1")
     connection.commit()
     connection.close()
+    st.cache_data.clear()
 
 def delete_all_investments_entry():
     connection = get_connection()
@@ -655,13 +711,27 @@ def delete_all_investments_entry():
     cursor.execute("DELETE FROM INVESTMENTS WHERE ID > 1")
     connection.commit()
     connection.close()
+    st.cache_data.clear()
+
+
+def delete_all_losses_entry():
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("DELETE FROM LOSSES WHERE ID > 1")
+    connection.commit()
+    connection.close()
+    st.cache_data.clear()
 
 
 if __name__ == "__main__":
     #print(get_losses())
-    delete_all_costs_entry()
+    data = merge_costs_and_losses()
+    data = pd.DataFrame(data)
+    
+    print(data)
+    print(data.columns)
     #print(get_total_costs_year(2026))
-    delete_all_earnings_entry()
+    #delete_all_earnings_entry()
     #delete_all_investments_entry()
     #print(get_gross_profit_except_current_year(2026))
     #delete_cost_entry(5)
