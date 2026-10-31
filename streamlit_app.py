@@ -25,6 +25,9 @@ st.set_page_config(page_title="My app", layout="wide")
 if "page" not in st.session_state:
     st.session_state.page = "Dashboard"
 
+if "cost_loss_view" not in st.session_state:
+    st.session_state.cost_loss_view = "Costs"
+
 # Τώρινος χρόνος
 current_year = datetime.now().year
 
@@ -54,20 +57,35 @@ st.markdown("""
 st.markdown(
     """
         <style>
-            /* εμφάνιση κουμπιών */ 
+            /* εμφάνιση κουμπιών */
             [data-testid="stMain"] button[kind="secondary"] {
-                background: #363636 !important;
-                border-radius: 10px;            
-                padding: 10px 24px;                
-                box-shadow: 0 0px 10px rgba(1, 95, 143, 0.5);
+                background: #151E2A !important;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                border-radius: 12px;
+                padding: 10px 23px;
+                border: 1px solid #434A54 !important;
+                transition: all 1s;
+                height: 1rem;
             }
+
+           
+
             /* hover effect */
             [data-testid="stMain"] button[kind="secondary"]:hover {
-                background: #D3D3D3 !important;
-                color: black;
+                border-color: transparent !important;
+                background: 
+                    linear-gradient(#0e1117, #0e1117) padding-box,
+                    linear-gradient(135deg, #00d2ff 0%, #3a7bd5 40%, #a855f7 70%, #ec4899 100%) border-box !important;
+                box-shadow: 0 0 5px rgba(168, 85, 247, 0.35); 
+                color: #ffffff !important;
+            
             }
-                                    
-            }
+
+                               
+            
+            
         </style>
     """
 ,unsafe_allow_html=True)
@@ -98,7 +116,7 @@ st.markdown(
             to {opacity:0%; visibility:hidden;}
        }
 
-       }
+       
     </style>        
 """
 ,unsafe_allow_html=True)
@@ -108,21 +126,6 @@ st.markdown(
 st.markdown("""
     <style>
 
-        /* εξατόμικευση upload button global */
-        .st-key-upload-button-global {
-            display: flex !important;
-            margin-left:38%;
-                            
-        }
-
-        /* εξατόμικευση θέσης-μεγέθους */
-        .st-key-upload-button-global [data-testid="stFileUploader"] {
-            margin-left: 33%; 
-            height: 0px !important;
-            background-color: blue !important;
-            
-        }
-                
         .st-key-upload-button-global label{
             display:none !important;
         }
@@ -130,29 +133,40 @@ st.markdown("""
         /* εξατομίκεση button (section) */
         .st-key-upload-button-global section{
             background-color: transparent !important;
-            display: flex !important; 
-            height: 0px !important;
-            margin-top: 11%;
+            display: flex !important;
+            flex-direction: column !important;
+            padding: 0 !important;
+            justify-content: flex-end !important;
+            text-align:center;
+           
         }
 
         /* αφαίρεση instruction (200 MB etc) */
-        [data-testid=stFileUploaderDropzoneInstructions] > div span{ 
-            display: none;
+        [data-testid="stFileUploaderDropzoneInstructions"] {
+            display: none !important;
         }
 
         /* εξατομίκεση κουμπιού */
-        div.st-key-upload-button-global [data-testid="stFileUploaderDropzone"] button {
-            margin-left: 10%;
-            font-weight: 500;
+        div.st-key-upload-button-global [data-testid="stFileUploaderDropzone"] button { 
             background-color: #151E2A !important;
             box-shadow: none !important;
-            
+            width: 1rem !important;
+              
+        }
+
+        /* μέγεθος του upload icon */
+        div.st-key-upload-button-global [data-testid="stFileUploaderDropzone"] button *{ 
+            font-size: 20px;        
         }
         
-        
+        div.st-key-upload-button-global [data-testid="stFileUploaderDropzone"] button [data-testid="stMarkdownContainer"] {
+            display: none !important;
+        }
+
+       
+
         /* εξατομίκεση κουμπιού σε state hover */
         div.st-key-upload-button-global [data-testid="stFileUploaderDropzone"] button:hover {
-            margin-left: 10%;
             color: white;
             background-color: #151E2A !important;    
         }
@@ -169,9 +183,53 @@ st.markdown("""
                 transform: scale(1);
             }
             to {
-                transform: scale(1.07);
+                transform: scale(1.4);
             }
         }
+    </style>
+""",unsafe_allow_html=True)
+
+# Customize download button global
+st.markdown("""
+    <style>
+
+          
+        /* εξατομίκεση κουμπιού */
+        div.stDownloadButton button[kind="secondary"] { 
+            background-color: #151E2A !important;
+            box-shadow: none !important;
+            width: 3.1rem !important;
+            height: 2.5rem !important;
+            padding: 0 !important;  
+        }
+
+        /* μέγεθος του upload icon */
+        div.stDownloadButton button[kind="secondary"] *{ 
+            font-size: 20px;        
+        }
+        
+       
+        /* εξατομίκεση κουμπιού σε state hover */
+        div.stDownloadButton button[kind="secondary"]:hover {
+            color: white !important;
+            background-color: #151E2A !important;    
+        }
+
+
+        /* εξατομίκεση κειμένου μέσα στο κουμπί σε state hover */
+        div.stDownloadButton button[kind="secondary"]:hover div  {
+            animation: textScaleDownload 0.2s forwards;
+        }
+
+        @Keyframes textScaleDownload { 
+            from { 
+                transform: scale(1)
+            }
+            to { 
+                transform: scale(1.2)
+            }
+        }
+        
     </style>
 """,unsafe_allow_html=True)
 
@@ -396,7 +454,7 @@ def upload_button():
 
 
 # upload file container  
-def upload_file_container():
+def upload_file_container(required_text):
 # Customize το upload file div
     st.markdown("""
         <style>
@@ -445,7 +503,7 @@ def upload_file_container():
         # μπλέ container
         with st.container(border=True, key="upload-container"):
                 
-            st.markdown("""
+            st.markdown(f"""
                 <!-- μπλέ container το οποίο πειλαμβάνει όλα τα υπόλοιπα elements -->
                 <div class="upload_icon">
                     <!-- upload file icon -->
@@ -461,10 +519,11 @@ def upload_file_container():
                 <!-- Subheader div -->
                 <div class="card-subtitle">
                     <span>To get started, please upload your data file (CSV) below.</span>
-                    <p>(required costs and earnings CSV)</p>
+                    <p>({required_text})</p>
                     <p>Download a template to get started, fill in your figures, and upload the file.</p>
                 </div>
-
+            """,unsafe_allow_html=True,)
+            st.markdown("""
                 <style>
 
                 /* εξατομίκευση μπλέ container */
@@ -526,26 +585,28 @@ def upload_file_container():
 
 
 
-
-
     
 def render_dashboard():
-    
-    mainc1, _ ,mainc3 = st.columns(3)
-    with mainc1:
-        st.title("Dashboard")
-    
- 
+
+
     # Περίπτωση όπου οι πίνακες earnings και costs είναι κενοί
     if utils.get_earnings().empty or utils.get_losses_or_costs("costs").empty:
-        upload_file_container()
+        upload_file_container("required Earnings and Costs CSVs")
                    
         # σταματάει το πρόγραμμα εδώ εφόσον δεν έχει τα απαρραίτητα δεδομένα
         # έτσι ώστε να εκτυπώσει τα charts και να υπολογίσει τα στατιστικά            
-        st.stop()            
+        st.stop()  
+    
+    mainc1, _ = st.columns(2)
+    with mainc1:
+        st.title("Dashboard")
+    
+    # Κάτω από τα metrics η οριζόντια γραμμή
+    st.divider()
+     
+              
 
-    with mainc3:
-        uploaded_file = upload_button()
+    
 
     # Δημιουργεί 5 στήλες (σαν containers) στα οποία χωρίζεται η οθόνη
     c1, c2, c3, c4, c5 = st.columns(5)
@@ -582,8 +643,7 @@ def render_dashboard():
             st.metric(label = f"Total costs {current_year}", value = f"{database.get_total_costs_year(current_year):,.2f}€")
    
 
-    # Κάτω από τα metrics η οριζόντια γραμμή
-    st.divider()    
+      
             
 
     col1, col2 = st.columns(2)
@@ -594,7 +654,8 @@ def render_dashboard():
     # GROSS PROFIT IS 0 
     if not gross_profit_for_each_month:
         st.toast(body=" Gross profit for the current year is 0", icon="⚠️", duration="infinite")
-        
+        st.stop()
+       
     # Για να μετατρέψω την παραπάνω λίστα σε 2 μοναδικές λίστες αρκεί
     # να πάρω το πρώτο και δεύτερο στοιχείο από το κάθε tuple και να το προσθέσω σε 
     # κάθε λίστα αντίστοιχα
@@ -616,7 +677,8 @@ def render_dashboard():
     cost_losses = [f"{element:.2f}" for element in cost_losses]
     
     # Bar chart για gross profits per month
-    
+    st.write(months)
+    st.write(profit)
     with col1:
         with st.container(border=True):
             st.subheader("Profits per month (Gross)")
@@ -667,12 +729,13 @@ def render_dashboard():
 def render_search_query(search_query):
     # search feature για την costs&losses σελίδα
     if st.session_state.page == "Costs&Losses":
-        if st.session_state.show_costs:
+        # Check the unified session state
+        if st.session_state.cost_loss_view == "Costs":
             dataframe_costs = utils.get_losses_or_costs("costs")
-            results  = dataframe_costs[dataframe_costs["DESCRIPTION"].str.contains(search_query, case=False, na=False)]     
+            results = dataframe_costs[dataframe_costs["DESCRIPTION"].str.contains(search_query, case=False, na=False)]
         else:
-            dataframe_losses= utils.get_losses_or_costs("losses")
-            results  = dataframe_losses[dataframe_losses["DESCRIPTION"].str.contains(search_query, case=False, na=False)]
+            dataframe_losses = utils.get_losses_or_costs("losses")
+            results = dataframe_losses[dataframe_losses["DESCRIPTION"].str.contains(search_query, case=False, na=False)]
         edited_df = st.data_editor(
             results, 
             num_rows="delete",
@@ -784,34 +847,203 @@ if "show_costs" not in st.session_state:
 # το not χρησιμοποιείτε ώστε να αντιστρέφεται η τιμή,
 # μια καθολική τιμή όπως : st.session_state.show_costs = False
 # θα επέφαιρε πάντα το ίδιο αποτέλεσμα
-def toggle_button_label():
-    st.session_state.show_costs = not st.session_state.show_costs
 
 
 
+#st.markdown("""
+#<style>
+#    /* Target every column container in the main view */
+#    [data-testid="stColumn"] {
+#        border: 1px solid white !important;
+#        
+#        
+#       
+#    }
+#</style>
+#""", unsafe_allow_html=True)
+
+# μειώνω το gap που βρισκεται έξω απο το hr div
+# το οποίο ορίζει αυτόματα το streamlit
+st.markdown("""
+<style>
+   
+    hr {
+        margin-top: 0.2rem !important;
+        margin-bottom: 0.8rem !important;
+    }
+        
+    
+</style>
+""", unsafe_allow_html=True)
 
 
+def no_data_text():
+
+    
+
+   #with center_col:
+        # μαύρο container
+        with st.container(border=True, key="upload-info-container"):
+            st.markdown("""
+                <!-- μαύρο container το οποίο πειλαμβάνει όλα τα υπόλοιπα elements -->
+                <div class="error-info">
+                    <!-- upload info icon -->
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#F43F5E" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line> 
+                    </svg>
+                    <br>
+                    <!-- Title div -->
+                    <div class="card-title-nothing-here">Nothing here yet</div>
+                    <!-- Subheader div -->
+                    <div class="card-subtitle-add-data">Add data above to see your analytics.</div>      
+                </div>
+                
+                
+                    
+            """,unsafe_allow_html=True,)
+
+            st.markdown("""
+                <style>
+
+                    /* εξατομίκευση μαύρου container */
+                    .st-key-upload-info-container {
+                        border-radius: 30px;
+                        background-color:#171A20 !important;
+                        height: 100%;
+                        border: 1px solid #23262B;
+                        flex-direction: column;
+                        width: 100% !important;
+                        
+                    }
+                    
+                    /* κάνω center το κείμενο και το icon */
+                    .error-info { 
+                        display:flex;
+                        flex-direction:column;
+                        align-items: center;
+                        justify-content: center;
+                    }
+
+                    .card-title-nothing-here { 
+                        font-size: 20px;
+                        font-weight: bold;
+                        letter-spacing: 1px;
+                    }
+                </style>
+                    
+            """,unsafe_allow_html=True,)
+
+            # upload button
+            uploaded_file = st.file_uploader("", type=["csv"], key="upload-button-info-message", accept_multiple_files=True)
+
+            st.markdown("""
+                <style>
+                    /* εξατόμικευση upload button */
+                    .st-key-upload-button-info-message {
+                        justify-content: center !important;
+                        align-items: center !important;
+                    }
+                                            
+                    .st-key-upload-button-info-message label{
+                        display:none !important;
+                    }
+                    
+                    /* κάνω match το χρόμα του section στο οποίο περικλείεται το
+                    κουμπί με αυτό του error μηνύματος */
+                    .st-key-upload-button-info-message section {
+                        background-color: #171A20 !important;           
+                    }
+                    
+                    /* εξατόμικευση div στο οποίο περικλείετε το upload button */
+                    div.st-key-upload-button-info-message { 
+                        display:flex;
+                        text-align:center;
+                        justify-content: center;
+                    }
+                </style>
+            """, unsafe_allow_html=True)
+                
+            for file in uploaded_file:
+                dataframe = pd.read_csv(file)
+                    
+                # Για κάθε CSV το κάνω format με το module loader
+                # ανάλογα με το text το οποίο επιστραφεί εμφανίζεται το αντίστοιχο μήνυμα
+                result = loader.add_to_database(dataframe)
+                # Περίπτωση όπου τα δεδομένα δεν είναι σωστά
+                if result != "data has been added":
+                    st.error(body=result)            
+                else:
+                    
+                    st.success("Data has been added successfully")    
+    
+    
+    
+            
+       
 
 
 def render_costs_losses():
     
-    mainc1, _ ,mainc3 = st.columns(3)
-    with mainc1:
-        st.title("Costs & Losses")
-
+   
     # Περίπτωση όπου οι πίνακες costs και losses είναι κενοί 
     if not(database.get_costs() or database.get_losses()):
-        upload_file_container()
+        upload_file_container("required Costs or Losses CSV")
         st.stop()
 
-    with mainc3:
-        uploaded_file = upload_button()
+    st.title("Costs & Losses")
+    
+    _, btnc = st.columns([5,2])
+    
+        
+    with btnc:
+        _, addc, expc, impc = st.columns([4,2.5,1.2,1.2], vertical_alignment="bottom")
+        
+            
+        with expc:
+            st.markdown("""
+                <style>
+                    [data-testid="stDownloadButton"] > button { 
+                        background-color:red !important;
+                        
+                    }
+                </style>
+            """,unsafe_allow_html=True)
 
-    c1, c2 = st.columns([6, 1.5], vertical_alignment="bottom")
+            if st.session_state.cost_loss_view == "Costs":
+                dataframe_costs = utils.get_losses_or_costs("costs")
+                st.download_button(
+                    ":material/Download:",
+                    dataframe_costs.to_csv(index=False),
+                    file_name="costs.csv",
+                    mime="text/csv",
+                    
+                )
+            else:
+                dataframe_losses = utils.get_losses_or_costs("losses")
+                st.download_button(
+                    ":material/Download:",
+                    dataframe_losses.to_csv(index=False),
+                    file_name="losses.csv",
+                    mime="text/csv",
+                   
+                )
+
+        with impc:
+            uploaded_file = upload_button()
+    
+    st.divider()
+
+    
+
+    
+
+    c1, c2 = st.columns([6, 1.5], vertical_alignment="top")
     
     with c1:
             
-        searchc, tablec, exportc = st.columns([10,1.8,1.8], vertical_alignment="bottom")
+        searchc, _, tablec = st.columns([10,10,3], vertical_alignment="bottom")
         # Search form
         with searchc:
             with st.form("form", border=False):
@@ -829,35 +1061,48 @@ def render_costs_losses():
                 with fc1:
                     search_query = st.text_input("Search entry", placeholder="Filter by description", label_visibility="collapsed")
                 with fc2:
-                    submit_button = st.form_submit_button("search")
+                    submit_button = st.form_submit_button(":material/search:")
             if submit_button and search_query.strip():
                 render_search_query(search_query)
 
         # Tables costs & losses
         with tablec:
-            # Ανάλογα με την τιμή του st.session_state.show_costs παρουσιάζεται
-            # ο αντίστοιχος πίνακας, παρακάτω ορίζεται το κείμενο που εμφανίζεται στο
-            # κουμπί το οποίο είναι υπεύθυνο για την εναλλαγή μεταξύ των πινάκων    
-            if st.session_state.show_costs:
-                label = "Show Losses"
-            else:
-                label = "Show Costs"
-            # Όταν ο χρήστης πατάει το παρακάτω κουμπί καλείτε η toggle_button_label
-            st.button(label, on_click=toggle_button_label)
-            if (st.session_state.show_costs):
-                with c1:
-                    # Εμφάνησε τον πίνακα costs
+            def on_view_change():
+                st.session_state.cost_loss_view = st.session_state.cost_loss_selector
+              
+            
+            # Άναλογα με την επιλογή του χρήστη εμφανίζεται ο αντίτοιχος πίνακας
+            
+            view_filter = st.segmented_control(
+                "Filter View",
+                options=["Costs", "Losses"],
+                default=st.session_state.cost_loss_view,   # Remembers past choice!
+                key="cost_loss_selector",                   # Distinct widget key
+                on_change=on_view_change,
+                label_visibility="collapsed",
+                required=True
+            )
+
+            
+            
+            if view_filter == "Costs":
+                with c1: 
 
                     # Στην dataframe_costs επιστρέφεται ο πίνακας μέσω της get_losses_or_costs,
                     # όπου ανάλογα την τιμή της παραμέτρου επιλέγει ποιόν πίνακα να επιστρέψει
                     dataframe_costs = utils.get_losses_or_costs("costs")
+                    # σε περίπτωση που ο πίνακας είναι κενός 
+                    # εμφάνησε το παρακάτω μήνυμα
                     if dataframe_costs.empty:
-                        st.write("There are no data.")
+                        _,col, _ = st.columns(3)
+                        with col:
+                            st.container(border=True)
+                            no_data_text()
                     else:
                         edited_df = st.data_editor(
                             dataframe_costs, 
                             num_rows="delete",
-                            height=685,
+                            height=428,
                             disabled=list(dataframe_costs.columns.values),
                             column_config={
                                             "DATE" : st.column_config.DateColumn(format="DD/MM/YYYY"),
@@ -880,14 +1125,19 @@ def render_costs_losses():
             else:
                 with c1:
                     # Εμφάνησε τον πίνακα losses
+                    # σε περίπτωση που ο πίνακας είναι κενός 
+                    # εμφάνησε το παρακάτω μήνυμα
                     dataframe_losses = utils.get_losses_or_costs("losses")
                     if dataframe_losses.empty:
-                        st.write("There are no data.")
+                        _,col, _ = st.columns(3)
+                        with col:
+                            st.container(border=False, height=60)
+                            no_data_text()
                     else:
                         edited_df = st.data_editor(
                             dataframe_losses, 
                             num_rows="delete",
-                            height=685,
+                            height=428,
                             disabled=list(dataframe_losses.columns.values),
                             column_config={
                                             "DATE" : st.column_config.DateColumn(format="DD/MM/YYYY"),
@@ -901,41 +1151,32 @@ def render_costs_losses():
                             for id in deleted_ids:
                                 database.delete_loss_entry(id)
                             st.rerun()
-        # Export κουμπί
-        with exportc:
-            if st.session_state.show_costs:
-                dataframe_costs = utils.get_losses_or_costs("costs")
-                st.download_button(
-                    ":material/Download: Export",
-                    dataframe_costs.to_csv(index=False),
-                    file_name="costs.csv",
-                    mime="text/csv",
-                    key="export_costs"
-                )
-            else:
-                dataframe_losses = utils.get_losses_or_costs("losses")
-                st.download_button(
-                    ":material/Download: Export",
-                    dataframe_losses.to_csv(index=False),
-                    file_name="losses.csv",
-                    mime="text/csv",
-                    key="export_losses"
-                )
+        
+       
+            
+            
         
         
         
             
     with c2:
-       
-        # Πρόσθεσε entries στους πίνακες costs και losses             
-        subc1, subc2 = st.columns([0.8,0.8])
         
-        with subc1:
-            if st.button(":material/add_notes:  Add Cost",type="secondary"):
-                open_add_cost_entry_form()
-        with subc2:
-            if st.button(":material/add_notes:  Add Loss", type="secondary"):
-                open_add_loss_entry_form()
+        st.container(border=False, height=1)
+        
+        _,btnc = st.columns([2,1.50])
+        with btnc:
+            # Πρόσθεσε entries στους πίνακες costs και losses             
+            if st.session_state.cost_loss_view == "Costs":
+                if st.button(":material/add_notes:  Add Cost", width=200):
+                    open_add_cost_entry_form()
+            else:
+                if st.button(":material/add_notes:  Add Loss"):
+                    open_add_loss_entry_form() 
+       
+            
+
+        
+        
         # METRICS
         
         with st.container(border=True):
@@ -944,8 +1185,8 @@ def render_costs_losses():
             st.metric("Total Costs", f"{database.get_total_costs_year():,.2f}€",  delta=utils.calculate_percentage_difference_for_costs(), format="percent", delta_description="vs. last years", delta_color="inverse")
         with st.container(border=True):
             st.metric("Total Losses", f"{database.get_total_losses_year():,.2f}€",   delta=utils.calculate_percentage_difference_for_losses(), format="percent", delta_description="vs. last years", delta_color="inverse")
-
-       
+            
+        
 
 
 
@@ -1198,6 +1439,11 @@ def open_add_pending_earning_entry_form():
 
 def render_earnings():
     
+    # Περίπτωση όπου οι πίνακες costs και losses είναι κενοί 
+    if not(database.get_earnings()):
+        upload_file_container("required Earnings CSV")
+        st.stop()
+    
     # Κάνω hide τα instruction τα οποία δίνει το streamlit στο text input (search query)
     st.markdown(
     """
@@ -1233,7 +1479,7 @@ def render_earnings():
                 with fc1:
                     search_query = st.text_input("Search entry", placeholder="Filter by description", label_visibility="collapsed")
                 with fc2:
-                    submit_button = st.form_submit_button("search")
+                    submit_button = st.form_submit_button(":material/search:")
             if submit_button and search_query.strip():
                 render_search_query(search_query)
             
@@ -1243,7 +1489,7 @@ def render_earnings():
         with btn_col2:
             dataframe_earnings = utils.get_earnings()
             st.download_button(
-                "⬇️ Export",
+                ":material/download:",
                 dataframe_earnings.to_csv(index=False),
                 file_name="earnings.csv",
                 mime="text/csv",
@@ -1732,6 +1978,10 @@ def open_add_investment_entry_form():
 
 def render_investments():
     
+    # Περίπτωση όπου οι πίνακες costs και losses είναι κενοί 
+    if not(database.get_investments()):
+        upload_file_container("required Investments CSV")
+        st.stop()
     
     st.title("Investments")
     # Κάνω hide τα instruction τα οποία δίνει το streamlit στο text input (search query)

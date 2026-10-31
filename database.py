@@ -725,11 +725,11 @@ def delete_all_losses_entry():
 
 if __name__ == "__main__":
     #print(get_losses())
-    data = merge_costs_and_losses()
-    data = pd.DataFrame(data)
+    #data = merge_costs_and_losses()
+    #data = pd.DataFrame(data)
     
-    print(data)
-    print(data.columns)
+    #print(data)
+    print(get_gross_profits_each_month_of_a_year(2026))
     #print(get_total_costs_year(2026))
     #delete_all_earnings_entry()
     #delete_all_investments_entry()

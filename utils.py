@@ -73,7 +73,8 @@ def calculate_percentage_difference_for_costs_and_losses():
     # Tύπος : (cost% * (total_costs_except_current_year/costs_and_losses_except_current_year)) * (loss% * (total_losses_except_current_year/costs_and_losses_except_current_year))
     cost_percentage_diff = calculate_percentage_difference_for_costs()
     loss_percentage_diff = calculate_percentage_difference_for_losses()
-    if cost_percentage_diff == None:
+    
+    if (cost_percentage_diff == None) or (loss_percentage_diff == None):
         return None
     
    
@@ -308,4 +309,4 @@ def delete_all():
 
 
 if __name__=='__main__':
-    format_donut_chart_data()
+    print(calculate_percentage_difference_for_costs_and_losses())
