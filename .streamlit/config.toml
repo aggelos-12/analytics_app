@@ -2,3 +2,4 @@
 base = "dark"
 [server]
 enableStaticServing = true
+[client]

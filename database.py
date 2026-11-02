@@ -188,6 +188,21 @@ def get_total_costs_year(year=None):
     connection.close()
     return total_costs
 
+# Επιστρέφει τα summed κόστη ανά κατηγορία για τον τωρινό μήνα
+@st.cache_data(show_spinner=False)
+def get_costs_for_current_month(current_month, current_year):
+    connection = get_connection()
+    cursor = connection.cursor()
+    query = """
+        SELECT CATEGORY, SUM(COST) AS COST
+        FROM COSTS  
+        WHERE STRFTIME('%m', DATE) = ? AND STRFTIME('%Y', DATE) = ?
+        GROUP BY CATEGORY
+    """
+    cursor.execute(query, (f"{current_month}",f"{current_year}",))
+    data = cursor.fetchall()
+    connection.close()
+    return data    
 
 # Επιστρέφει τo συνολικό  κόστος, χωρίς να συμπεριλιφθεί αυτό του φετινού χρόνου
 @st.cache_data(show_spinner=False)
@@ -447,7 +462,8 @@ def get_sum_investments():
     except requests.exceptions.RequestException as error:
         return f"Network error {error}"
 
-
+# Επιστρέφει τα κόστη και τις ζημιές ανά κατηγορία
+# (summed για κάθε κατηγορία)
 def merge_costs_and_losses():
     connection = get_connection()
     cursor = connection.cursor()
@@ -727,9 +743,11 @@ if __name__ == "__main__":
     #print(get_losses())
     #data = merge_costs_and_losses()
     #data = pd.DataFrame(data)
-    
+    #delete_all_investments_entry()
     #print(data)
-    print(get_gross_profits_each_month_of_a_year(2026))
+    current_month = datetime.today().month
+    current_year = datetime.today().year
+    print(get_costs_for_current_month(current_month, current_year))
     #print(get_total_costs_year(2026))
     #delete_all_earnings_entry()
     #delete_all_investments_entry()

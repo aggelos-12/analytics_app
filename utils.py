@@ -182,11 +182,18 @@ def get_categories(func):
     return data_categories
 
 
+# Συγχέει τα κόστη και τις ζημιές ανα κατηγορία σε ενα dataframe
+# και βρίσκει το συνολίκο ποσό ανα κατηγορία
 def merge_cost_and_losses():
     data = database.merge_costs_and_losses()
     data = pd.DataFrame(data,columns=['CATEGORY', 'AMOUNT'])
     return data
 
+# Επιστρέφει τα κόστη του τωρινού μήνα, summed ανα κατηγορία
+def get_costs_for_donut_chart():
+    data = database.get_costs_for_current_month(datetime.today().month, datetime.today().year)
+    data = pd.DataFrame(data, columns=['CATEGORY', 'AMOUNT'])
+    return data
 
 def add_template_row(dataframe, table):
     if table == "earnings":
@@ -274,25 +281,25 @@ def download_csv(table):
 # ώστε να ταιριάζουν με τις προυποθέσεις
 # του donut chart
 @st.cache_data(show_spinner=False)
-def format_donut_chart_data():
+def format_donut_chart_data(df):
     
-    df = merge_cost_and_losses()
-    # από 5%
+    
+    # 6% threshold
     percentage_threshold = (df["AMOUNT"].sum() * 6) / 100
-    print(percentage_threshold)
+    
 
     # filtered df στο οποίο περιλαμβάνονται οι κατηγορίες 
-    # οι οποίες έχουν μικρότερο ποσοστό συμμετοχης από 5%
+    # οι οποίες έχουν μικρότερο ποσοστό συμμετοχης από 6%
     new_df = df[df["AMOUNT"] < percentage_threshold]
 
-    # Εαν καμία κατηγορία δεν έχει ποσοστό συμμετοχής μικρότερο απο 5%
+    # Εαν καμία κατηγορία δεν έχει ποσοστό συμμετοχής μικρότερο απο 6%
     if new_df.empty:
         return df
 
     # Συνολικό ποσό για την νέα κατηγορία OTHER
     other_sum_amount = new_df['AMOUNT'].sum()
 
-    # Περιλαμάνοται μόνο οι κατηγίες που έχουν ποσοστό συμμετοχής μεγαλύτερο από 5%
+    # Περιλαμάνοται μόνο οι κατηγίες που έχουν ποσοστό συμμετοχής μεγαλύτερο από 6%
     df = df[df["AMOUNT"] >= percentage_threshold]
     # Η OTHER κατηγορία
     new_df2 = pd.DataFrame({"CATEGORY": ["OTHER"], "AMOUNT": [other_sum_amount]})
@@ -301,9 +308,11 @@ def format_donut_chart_data():
     final_df = pd.concat([df,new_df2], ignore_index=True)
     return final_df
 
+
+
 def delete_all():
     database.delete_all_costs_entry()
-    database.delete_all_earnings_entry
+    database.delete_all_earnings_entry()
     database.delete_all_investments_entry()
     database.delete_all_losses_entry()
 
