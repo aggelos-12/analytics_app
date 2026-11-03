@@ -506,7 +506,30 @@ def get_investments_for_line_chart():
     return entries
 
 
-
+# Επιστρέφει τις πιο πρόσφατες συναλλάγες ανεξεραίτως κατηγορίας
+# (earnings, costs, losses)
+# πολλαπλασιάζω με -1 τα costs και losses ποσά 
+# έτσι ώστε να ξεχωρίζουν στο UI
+@st.cache_data(show_spinner=False)
+def get_10_recent_transactions():
+    connection = get_connection()
+    cursor = connection.cursor()
+    query= """
+        SELECT DATE, DESCRIPTION, CATEGORY, PROFIT AS AMOUNT
+        FROM EARNINGS
+        UNION ALL
+        SELECT DATE,DESCRIPTION, CATEGORY, -1 * COST AS AMOUNT
+        FROM COSTS
+        UNION ALL
+        SELECT DATE, DESCRIPTION,CATEGORY, -1 * LOSS AS AMOUNT
+        FROM LOSSES 
+        ORDER BY DATE DESC
+        LIMIT 10
+    """
+    cursor.execute(query)
+    data = cursor.fetchall()
+    connection.close()
+    return data
 
 # Επιστρέφει τον πίνακα COSTS
 @st.cache_data(show_spinner=False)
@@ -745,9 +768,8 @@ if __name__ == "__main__":
     #data = pd.DataFrame(data)
     #delete_all_investments_entry()
     #print(data)
-    current_month = datetime.today().month
-    current_year = datetime.today().year
-    print(get_costs_for_current_month(current_month, current_year))
+    df = pd.DataFrame(get_10_recent_transactions())
+    print(df)
     #print(get_total_costs_year(2026))
     #delete_all_earnings_entry()
     #delete_all_investments_entry()
