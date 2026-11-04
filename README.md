@@ -35,7 +35,7 @@ A modern, high-fidelity personal finance and portfolio tracking dashboard built 
 
 * **CSV Data Pipeline:** Download pre-formatted CSV template files and bulk upload entries directly into the SQLite backend.
 
-## 🛠️ Architecture & Tech Stack
+## Architecture & Tech Stack
 
 * **Frontend & App Framework:** [Streamlit](https://streamlit.io/) with targeted Emotion CSS/HTML injection via `st.markdown`.
 
