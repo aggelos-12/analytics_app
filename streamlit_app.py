@@ -13,6 +13,8 @@ import loader
 
 
 
+
+
 st.set_page_config(page_title="My app", layout="wide")
 
 # Με την μεταβλητή page δημιουργώ μια multipage εφαρμογή
@@ -30,6 +32,23 @@ if "cost_loss_view" not in st.session_state:
 
 # Τώρινος χρόνος
 current_year = datetime.now().year
+
+# Κρύβω την πάνω μπάρα του streamlit (toolbox)
+st.markdown("""
+    <style>
+        
+        .block-container, [data-testid="stMainBlockContainer"] {
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+            
+        }
+        [data-testid="stHeader"] {
+            display: none !important;
+        }
+        
+    </style>
+""", unsafe_allow_html=True)
+
 
 # Αφαιρώ τα anchors από τους τίτλους και αφαρώ το default κενό
 # που προσθέτει το streamlit στην κορυφή της σελίδας
@@ -198,7 +217,9 @@ st.markdown("""
             background-color: #151E2A !important;    
         }
 
-        
+        div[data-testid="stFileChip"]{ 
+            display: none;
+        }
 
         /* εξατομίκεση κειμένου μέσα στο κουμπί σε state hover */
         div.st-key-upload-button-global [data-testid="stFileUploaderDropzone"] button:hover div  {
@@ -260,6 +281,41 @@ st.markdown("""
     </style>
 """,unsafe_allow_html=True)
 
+
+
+
+# Customize download button τα οποία βρίσκονται στο sidebar
+st.markdown("""
+    <style>
+        /* εμφάνιση κουμπιών */
+        div.stDownloadButton button[kind="primary"] {
+            background: #151E2A !important;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 12px;
+            padding: 10px 23px;
+            border: 2px solid #434A54 !important;
+            transition: all 1s;
+            height: 1rem;
+        }
+        /* hover effect */
+        div.stDownloadButton button[kind="primary"]:hover {
+            border-color: transparent !important;
+            background: 
+                linear-gradient(#0e1117, #0e1117) padding-box,
+                linear-gradient(135deg, #00d2ff 0%, #3a7bd5 40%, #a855f7 70%, #ec4899 100%) border-box !important;
+            box-shadow: 0 0 5px rgba(168, 85, 247, 0.35); 
+            color: #ffffff !important;
+        
+        }
+
+       
+
+        
+        
+    </style>
+""",unsafe_allow_html=True)
 
 # ================================================================
 
@@ -339,17 +395,80 @@ with st.sidebar:
             <div class="logo-icon-box">
                 <svg 
                     xmlns="http://www.w3.org/2000/svg" 
-                    width="18" 
-                    height="18" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="#FFFFFF" 
-                    stroke-width="2.3" 
-                    stroke-linecap="round" 
-                    stroke-linejoin="round">
-                    <path d="M3.5 13.5L8.5 6.5L12.5 11.5L18.5 4" />
-                    <circle cx="13.5" cy="14.5" r="3.5" />
-                    <path d="M16 17L19.5 20.5" />
+                    viewBox="0 0 100 100" 
+                    width="64" 
+                    height="64"
+                >
+                    <defs>
+                        <!-- Background Delta Gradients -->
+                        <linearGradient id="dLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#10B981"/>
+                        <stop offset="100%" stop-color="#047857"/>
+                        </linearGradient>
+                        <linearGradient id="dRight" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#047857"/>
+                        <stop offset="100%" stop-color="#022C22"/>
+                        </linearGradient>
+                        <linearGradient id="dBotLeft" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#34D399"/>
+                        <stop offset="100%" stop-color="#059669"/>
+                        </linearGradient>
+                        <linearGradient id="dBotRight" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#059669"/>
+                        <stop offset="100%" stop-color="#064E3B"/>
+                        </linearGradient>
+                        <!-- Overlay Arrow Gradients -->
+                        <linearGradient id="aLeftTop" x1="0%" y1="100%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#6EE7B7"/>
+                        <stop offset="100%" stop-color="#10B981"/>
+                        </linearGradient>
+                        <linearGradient id="aLeftBot" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#10B981"/>
+                        <stop offset="100%" stop-color="#047857"/>
+                        </linearGradient>
+                        <linearGradient id="aRightTop" x1="0%" y1="100%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#A7F3D0"/>
+                        <stop offset="100%" stop-color="#34D399"/>
+                        </linearGradient>
+                        <linearGradient id="aRightBot" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#10B981"/>
+                        <stop offset="100%" stop-color="#047857"/>
+                        </linearGradient>
+                        <linearGradient id="aHeadTop" x1="0%" y1="100%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#A7F3D0"/>
+                        <stop offset="100%" stop-color="#6EE7B7"/>
+                        </linearGradient>
+                        <linearGradient id="aHeadBot" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#34D399"/>
+                        <stop offset="100%" stop-color="#059669"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- Background Delta / A-Frame -->
+                    <g id="Delta-Frame">
+                        <!-- Left Leg -->
+                        <polygon points="47.5,15 12.5,85 32.5,75 47.5,45" fill="url(#dLeft)" />
+                        <!-- Right Leg -->
+                        <polygon points="47.5,15 47.5,45 62.5,75 87.5,85" fill="url(#dRight)" />
+                        <!-- Bottom Left Base -->
+                        <polygon points="12.5,85 47.5,85 47.5,75 32.5,75" fill="url(#dBotLeft)" />
+                        <!-- Bottom Right Base -->
+                        <polygon points="47.5,85 87.5,85 62.5,75 47.5,75" fill="url(#dBotRight)" />
+                    </g>
+                    <!-- Overlay Arrow (92% opacity for the translucent glass bleed effect) -->
+                    <g id="Growth-Arrow" opacity="0.92">
+                        <!-- Left Shaft Top Facet -->
+                        <polygon points="27.5,50 47.5,65 47.5,75 22.5,55" fill="url(#aLeftTop)" />
+                        <!-- Left Shaft Bottom Facet -->
+                        <polygon points="22.5,55 47.5,75 47.5,85 17.5,60" fill="url(#aLeftBot)" />
+                        <!-- Right Shaft Top Facet -->
+                        <polygon points="47.5,65 72.5,30 77.5,35 47.5,75" fill="url(#aRightTop)" />
+                        <!-- Right Shaft Bottom Facet -->
+                        <polygon points="47.5,75 77.5,35 82.5,40 47.5,85" fill="url(#aRightBot)" />
+                        <!-- Arrowhead Top Facet -->
+                        <polygon points="72.5,30 62.5,25 97.5,10 77.5,35" fill="url(#aHeadTop)" />
+                        <!-- Arrowhead Bottom Facet -->
+                        <polygon points="77.5,35 97.5,10 90.5,44 82.5,40" fill="url(#aHeadBot)" />
+                    </g>
                 </svg>
             </div>
             <span style="padding-top: 0.5rem;  font-weight:bold;">Analytics App</span>
@@ -358,16 +477,11 @@ with st.sidebar:
         <style>
             .logo-container {
                 display:flex;
-                
                 height: 45px;
                 width: 100%;
-                border: 1px solid #23262B;
-                border-radius: 20px;
                 gap: 20px;
                 overflow: hidden;
-                margin-bottom: 1.2rem;
-                
-                
+                margin-bottom: 1.2rem;   
             }
             
             .logo-icon-box { 
@@ -377,7 +491,7 @@ with st.sidebar:
                 height: 100%;
                 width: 20%;
                 border-radius: 22px;
-                background:#171A20;
+                
                
             }
 
@@ -442,7 +556,7 @@ with st.sidebar:
         
     )
 
-    st.button("delete all", on_click=utils.delete_all)
+    #st.button("delete all", on_click=utils.delete_all)
 
     # Ανάλογα με την επιλογή το selectbox, εμφανίζεται το αντίστοιχο κουμπί
     # ώστε να κατεβάσει ο χρήστης το αντίστοιχο CSV
@@ -454,6 +568,7 @@ with st.sidebar:
                 file_name="earnings.csv",
                 mime="text/csv",
                 icon=":material/download:",
+                type="primary"
             )
             
         elif template == "Pending Earnings":
@@ -462,7 +577,8 @@ with st.sidebar:
                 data=utils.download_csv("pearnings").to_csv(index=False).encode("utf-8"),
                 file_name="pending_earnings.csv",
                 mime="text/csv",
-                icon=":material/download:", 
+                icon=":material/download:",
+                type="primary" 
             )
         elif template == "Investments":
             st.download_button(
@@ -470,7 +586,8 @@ with st.sidebar:
                 data=utils.download_csv("investments").to_csv(index=False).encode("utf-8"),
                 file_name="ivestments.csv",
                 mime="text/csv",
-                icon=":material/download:", 
+                icon=":material/download:",
+                type="primary" 
             )
         elif template == "Costs":
            
@@ -479,7 +596,8 @@ with st.sidebar:
                 data=utils.download_csv("costs").to_csv(index=False).encode("utf-8"),
                 file_name="costs.csv",
                 mime="text/csv",
-                icon=":material/download:", 
+                icon=":material/download:",
+                type="primary" 
             )
         elif template == "Losses":
             st.download_button(
@@ -487,7 +605,8 @@ with st.sidebar:
                 data=utils.download_csv("losses").to_csv(index=False).encode("utf-8"),
                 file_name="losses.csv",
                 mime="text/csv",
-                icon=":material/download:" 
+                icon=":material/download:",
+                type="primary" 
             )
     
     # Eξατομίκεση για το selectbox και τα download buttons
@@ -514,7 +633,7 @@ with st.sidebar:
 
 # upload button 
 def upload_button():
-    return st.file_uploader("", type="csv",  key="upload-button-global", accept_multiple_files=True)
+    return st.file_uploader("", type="csv",  key="upload-button-global", accept_multiple_files=True, on_change=st.rerun)
 
 
 # upload file container  
@@ -1300,6 +1419,7 @@ def render_costs_losses():
     # Περίπτωση όπου οι πίνακες costs και losses είναι κενοί 
     if not(database.get_costs() or database.get_losses()):
         upload_file_container("required Costs or Losses CSV")
+        
         st.stop()
 
     st.title("Costs & Losses")
@@ -1323,18 +1443,39 @@ def render_costs_losses():
 
             if st.session_state.cost_loss_view == "Costs":
                 dataframe_costs = utils.get_losses_or_costs("costs")
+                # Σε περίπτωση που ο πίνακας με τα costs είναι κενός
+                # αν ο χρήστης κατεβάσει τα στοιχεία τότε κατεβάινει
+                # το template.
+                # Διαφορετικά κατεβαίνει ο πίνακας
+                if dataframe_costs.empty:
+                    download_table = utils.download_csv("costs").to_csv(index=False).encode("utf-8")
+                else:
+                    
+                    dataframe_costs = dataframe_costs.drop(columns=["ID"])
+                    download_table = dataframe_costs.to_csv(index=False)
+                
                 st.download_button(
                     ":material/Download:",
-                    dataframe_costs.to_csv(index=False),
+                    data = download_table,
                     file_name="costs.csv",
                     mime="text/csv",
                     
                 )
             else:
                 dataframe_losses = utils.get_losses_or_costs("losses")
+                # Σε περίπτωση που ο πίνακας με τα losses είναι κενός
+                # αν ο χρήστης κατεβάσει τα στοιχεία τότε κατεβάινει
+                # το template.
+                # Διαφορετικά κατεβαίνει ο πίνακας
+                if dataframe_losses.empty:
+                    download_table = utils.download_csv("losses").to_csv(index=False).encode("utf-8")
+                else:
+                    dataframe_losses = dataframe_losses.drop(columns=["ID"])
+                    download_table = dataframe_losses.to_csv(index=False)
+                
                 st.download_button(
                     ":material/Download:",
-                    dataframe_losses.to_csv(index=False),
+                    data= download_table,
                     file_name="losses.csv",
                     mime="text/csv",
                    
@@ -1342,6 +1483,19 @@ def render_costs_losses():
 
         with impc:
             uploaded_file = upload_button()
+
+            for file in uploaded_file:
+                dataframe = pd.read_csv(file)
+                    
+                # Για κάθε CSV το κάνω format με το module loader
+                # ανάλογα με το text το οποίο επιστραφεί εμφανίζεται το αντίστοιχο μήνυμα
+                result = loader.add_to_database(dataframe)
+                # Περίπτωση όπου τα δεδομένα δεν είναι σωστά
+                if result != "data has been added":
+                    st.error(body=result)            
+                
+                            
+                        
     
     st.divider()
 
