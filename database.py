@@ -411,7 +411,8 @@ def get_total_net_profit_of_each_year():
 
 # Χρησιμοποιείτε για να κάνει convert το νόμισμα της επένδυσης
 # σε ευρώ (σε περίπτωση όπου δεν είναι ευρώ), έπειτα βρίσκει το
-# συνολικό ποσό επενδύσεων 
+# συνολικό ποσό επενδύσεων
+@st.cache_data(show_spinner=False) 
 def get_sum_investments():
     try:
         current_date = datetime.today()
@@ -464,6 +465,7 @@ def get_sum_investments():
 
 # Επιστρέφει τα κόστη και τις ζημιές ανά κατηγορία
 # (summed για κάθε κατηγορία)
+@st.cache_data(show_spinner=False)
 def merge_costs_and_losses():
     connection = get_connection()
     cursor = connection.cursor()
@@ -644,7 +646,9 @@ def add_cost_entry(date, cost, description, category, notes):
     cursor.execute('INSERT INTO COSTS (DATE, COST, DESCRIPTION, CATEGORY, NOTES) VALUES (?,?,?,UPPER(?),?)', (date, cost, description, category, notes))
     connection.commit()
     connection.close()
-    st.cache_data.clear()
+    st.cache_data.clear() # καθαρίζει το cache ετσι ώστε να τρέχει η εφαρμογή τις
+                          # μεθόδους αντί να πέρνει την αποθηκευμένει cache τιμή
+                          # event base caching
 
 
 # Προσθέτει νεο entry στον πίνακα earning

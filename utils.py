@@ -195,6 +195,8 @@ def get_costs_for_donut_chart():
     data = pd.DataFrame(data, columns=['CATEGORY', 'AMOUNT'])
     return data
 
+# Format function για τα CSVs
+@st.cache_data(show_spinner=False)
 def add_template_row(dataframe, table):
     if table == "earnings":
         new_row = pd.Series({ 
@@ -248,6 +250,8 @@ def add_template_row(dataframe, table):
     dataframe = pd.concat([dataframe,new_row.to_frame().T])
     return dataframe
 
+
+
 def download_csv(table):
     if table == "earnings":
         dataframe = get_earnings()
@@ -280,7 +284,6 @@ def download_csv(table):
 # και επεξεργάζεται τα δεδομένα έτσι
 # ώστε να ταιριάζουν με τις προυποθέσεις
 # του donut chart
-@st.cache_data(show_spinner=False)
 def format_donut_chart_data(df):
     
     

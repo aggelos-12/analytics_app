@@ -664,7 +664,7 @@ def render_dashboard():
     
     st.title("Dashboard", anchor=None)
     
-    
+    today = datetime.today()
      
               
 
@@ -765,6 +765,7 @@ def render_dashboard():
 
         
 
+
     # Pandas dataframe με μόνο τα κόστη του τωρινού μήνα summed ανα κατηγορία
     costs_for_current_month_df = utils.format_donut_chart_data(utils.get_costs_for_donut_chart())
 
@@ -775,74 +776,142 @@ def render_dashboard():
 
     # Donut chart
     with donutc:
-        with st.container(border=True):
-                    
-            fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.7, name="Total costs for current month")])
-            fig.update_layout(height=396)
+        with st.container(border=True, height=488):
+            if costs_for_current_month_df.empty:
+                st.markdown(f"""
+                    <div class="no-rec-trans-main">
+                        <div class="no-rec-trans-icon">
+                            <svg 
+                                xmlns="http://www.w3.org/2000/svg" 
+                                viewBox="0 0 100 100" 
+                                width="64" 
+                                height="64" 
+                                fill="none"
+                                style="filter: drop-shadow(0px 0px 14px rgb(255,255,255, 0.2)); overflow: visible;"
+                            >
+                                <!-- Card Outline & Details -->
+                                <g stroke="white" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="7" y="11" width="76" height="66" rx="13" />
+                                    <line x1="7" y1="28" x2="83" y2="28" />
+                                    <line x1="7" y1="41" x2="83" y2="41" />
+                                    <line x1="17" y1="53" x2="31" y2="53" />
+                                    <line x1="17" y1="63" x2="22" y2="63" />
+                                </g>
+                                <!-- Circular Badge Overlay -->
+                                <circle cx="73" cy="74" r="23" fill="#2C3E50" />
+                                <!-- Inner "X" Close Mark -->
+                                <g stroke="#FFFFFF" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="64" y1="65" x2="82" y2="83" />
+                                    <line x1="82" y1="65" x2="64" y2="83" />
+                                </g>
+                            </svg>
+                        </div>
+                        <br>
+                        <div class="no-rec-text">There are curretly no expenses in {today.strftime("%B")} {today.strftime("%Y")}</div>
+                    </div>
+                """,unsafe_allow_html=True)
+                st.markdown("""
+                    <style>
+                        .no-rec-trans-main { 
+                            display:flex;
+                            flex-direction:column;
+                            justify-content: center;
+                            align-items: center;
+                            height: 100%;
+                            min-height: 380px;
+                            
+                        }
 
-            colors = ['#3B82F6', '#06B6D4', '#F43F5E', '#6366F1', '#8B5CF6', '#EC4899', '#475569']
+                        .no-rec-trans-icon {
+                            display:flex;
+                            justify-content: center;
+                            align-items: center; 
+                            border-radius: 9999px;
+                            border: 1px solid #3D4044;
+                            background-color: #151C29;
+                            width: 120px;
+                            height: 120px;
+                            
+                        }
 
-            fig.update_traces(
-                marker=dict(colors=colors, line=dict(color='#141C28', width=4)), rotation=90, textfont_size=15,
-                hovertemplate="<b>%{x}</b><br>%{y}<extra></extra>")
+                        .no-rec-text { 
+                            font-size: 20px;
+                            font-weight: bold;
+                            letter-spacing: 1px;
+                        }
+                    </style>
 
-            fig.update_layout(legend=dict(
-                bgcolor='#141C28',
-                bordercolor='#2E3B4E',
-                borderwidth=2,
+                """,unsafe_allow_html=True)
+            else:
+                      
+                fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.7, name="Total costs for current month")])
+                fig.update_layout(height=394)
 
+                colors = ['#3B82F6', '#06B6D4', '#F43F5E', '#6366F1', '#8B5CF6', '#EC4899', '#475569']
+
+                fig.update_traces(
+                    marker=dict(colors=colors, line=dict(color='#141C28', width=4)), rotation=90, textfont_size=15,
+                    hovertemplate="<b>%{label}</b><br>Amount: %{value:,.2f}€<extra></extra>")
+
+                fig.update_layout(legend=dict(
+                    bgcolor='#141C28',
+                    bordercolor='#2E3B4E',
+                    borderwidth=2,
+
+                            
+                    font_size=15,
+                    itemwidth=40,
+                    itemsizing="constant",
                         
-                font_size=15,
-                itemwidth=40,
-                itemsizing="constant",
-                    
-                title="Category Breakdown <br>",
-                title_font_size=19,
-                title_side="top center",
-                y=0.5),
-                hoverlabel=dict(
-                    bgcolor="#292A33",
-                    bordercolor="white",
-                    font_size=16,
-                    font_family='Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
-                    
+                    title="Category Breakdown <br>",
+                    title_font_size=19,
+                    title_side="top center",
+                    y=0.5),
+                    hoverlabel=dict(
+                        bgcolor="#292A33",
+                        bordercolor="white",
+                        font_size=16,
+                        font_family='Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
                         
-                ),
-                margin=dict(t=10),
-                autosize=True,
-            )
-            st.subheader("Expense Breakdown")
-                
-
-                
-            today = datetime.today()
-            fig.update_layout(
-
-                # Add annotations in the center of the donut pies.
-                annotations=[
-                    # Annotation 1: Header label
-                    dict(
-                        text=f"""<span style="font-size:1.4rem; color:#94A3B8;">{today.strftime("%b")} {today.strftime("%Y")}</span>""",
-                        x=0.5,
-                        y=0.55,
-                        font=dict(size=15, color="#94A3B8"),
-                        showarrow=False,
-                        xanchor="center"
+                            
                     ),
-                    # Annotation 2: Amount in euros
-                    dict(
-                        text=f"""<span style="font-size:1.5rem; color:white; font-family:Arial;">€{costs_for_current_month_df['AMOUNT'].sum()}</span>""",
-                        x=0.5,
-                        y=0.47,
-                        
-                        showarrow=False,
-                        xanchor="center"
-                    )
-                ]
-            )
-            st.plotly_chart(fig, use_container_width=True)    
+                    margin=dict(t=20),
+                    autosize=True,
+                )
+                st.subheader("Expense Breakdown")
+                    
+
+                    
+                
+                fig.update_layout(
+
+                    # Add annotations in the center of the donut pies.
+                    annotations=[
+                        # Annotation 1: Header label
+                        dict(
+                            text=f"""<span style="font-size:1.4rem; color:#94A3B8;">{today.strftime("%b")} {today.strftime("%Y")}</span>""",
+                            x=0.5,
+                            y=0.55,
+                            font=dict(size=15, color="#94A3B8"),
+                            showarrow=False,
+                            xanchor="center"
+                        ),
+                        # Annotation 2: Amount in euros
+                        dict(
+                            text=f"""<span style="font-size:1.5rem; color:white; font-family:Arial;">{costs_for_current_month_df['AMOUNT'].sum()}€</span>""",
+                            x=0.5,
+                            y=0.47,
+                            
+                            showarrow=False,
+                            xanchor="center"
+                        )
+                    ]
+                )
+                st.plotly_chart(fig)    
 
     
+    
+
     # Bar chart για gross profit
     with st.container(border=True):
         
@@ -874,9 +943,9 @@ def render_dashboard():
         
         # gross profit κείμενο κάτω από το bar chart
         fig.add_annotation(
-            x=-0.06,
-            y=-0.35,
-            text="""<span style="font-size:1.35rem;">Total Gross Profit: </span>""",
+            x=0.2,
+            y=-0.38,
+            text="""<span style="color:#10B981; font-size:1.2rem;">●</span>  <span style="font-size:1.35rem;">Total Gross Profit: </span>""",
             showarrow=False,
             xanchor="left", yanchor="bottom",
             xref="paper", yref="paper",
@@ -886,9 +955,9 @@ def render_dashboard():
         )
     
         fig.add_annotation(
-            x=0.28,
-            y=-0.35,
-            text=f"""<span style="font-size:1.35rem;">€{database.get_total_gross_profit_year(current_year)}</span>""",
+            x=0.35,
+            y=-0.38,
+            text=f"""<span style="font-size:1.35rem;">{database.get_total_gross_profit_year(current_year)}€</span>""",
             showarrow=False,
             xanchor="left", yanchor="bottom",
             xref="paper", yref="paper",
@@ -899,9 +968,9 @@ def render_dashboard():
     
         # costs & losses κείμενο κάτω από το bar chart
         fig.add_annotation(
-            x=0.95,
-            y=-0.35,
-            text="""<span style="font-size:1.35rem;">Total Costs & Losses: </span>""",
+            x=0.7,
+            y=-0.38,
+            text="""<span style="color:#FB7185; font-size:1.2rem;">●</span>  <span style="font-size:1.35rem;">Total Costs & Losses: </span>""",
             showarrow=False,
             xanchor="right", yanchor="bottom",
             xref="paper", yref="paper",
@@ -911,8 +980,8 @@ def render_dashboard():
         )
     
         fig.add_annotation(
-            x=1.1,
-            y=-0.35,
+            x=0.76,
+            y=-0.38,
             text=f"""<span style="font-size:1.35rem;">€{database.get_cost_losses_year(current_year)}</span>""",
             showarrow=False,
             xanchor="right", yanchor="bottom",
@@ -1548,7 +1617,7 @@ def render_costs_losses():
                     ),
                     # Annotation 2: Amount in euros
                     dict(
-                        text="""<span style="font-size:1.5rem; color:white; font-family:Arial;">€4,795.50</span>""",
+                        text=f"""<span style="font-size:1.5rem; color:white; font-family:Arial;">{database.get_total_losses_year() + database.get_total_costs_year():,.2f}€</span>""",
                         x=0.5,
                         y=0.47,
                         showarrow=False,
