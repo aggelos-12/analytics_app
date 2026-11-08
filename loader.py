@@ -88,9 +88,10 @@ def add_to_database(dataframe):
             elif table == "pearnings":
                 for row in dataframe.itertuples(index=False): 
                     database.add_pending_earning_entry(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+            return "data has been added"
+    return "Error! please check you uploaded data" 
             
-            break
-    return "data has been added"        
+           
            
              
     

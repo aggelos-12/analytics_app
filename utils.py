@@ -318,6 +318,7 @@ def delete_all():
     database.delete_all_earnings_entry()
     database.delete_all_investments_entry()
     database.delete_all_losses_entry()
+    database.delete_all_pending_earnings_entry()
 
 
 if __name__=='__main__':

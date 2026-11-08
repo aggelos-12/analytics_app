@@ -732,6 +732,14 @@ def delete_investment_entry(id):
     connection.close()
     st.cache_data.clear()
 
+def delete_all_pending_earnings_entry():
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("DELETE FROM PENDING_EARNINGS WHERE ID > 1")
+    connection.commit()
+    connection.close()
+    st.cache_data.clear()
+
 def delete_all_earnings_entry():
     connection = get_connection()
     cursor = connection.cursor()

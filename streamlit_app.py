@@ -30,6 +30,34 @@ if "page" not in st.session_state:
 if "cost_loss_view" not in st.session_state:
     st.session_state.cost_loss_view = "Costs"
 
+# Χρησιμοποιώ το παρακάτω έτσι ώστε να μηδενίζω
+# το Upload Button, στην περίπτωση όπου ο
+# χρήστης θέλει να σβήσει τα δεδομένα ενός
+# πίνακα ενω παράλληλα έχει κάνει upload ορισμένα
+# αρχεία, υπάρχει ένας ατέρμονος βρόχος
+# στον οποίο σβήνονται τα δεδομένα και αμέσως μετά
+# ξαναπροστίθονται
+if "upload_version" not in st.session_state:
+    st.session_state.upload_version = 0
+
+# Αποθηκεύω τα κατεβασμένα αρχεία σε ένα set
+# έτσι ώστε να μην κατεβαίνουν παραπάνω απο μία
+# φορά, λειτοργεί μόνο όταν ο χρήστης δεν κάνει
+# refresh
+if "processed_files" not in st.session_state:
+    st.session_state.processed_files = set()
+
+
+# Η παρακάτω μεταβλητή χρησιμοποιείτε ώστε να εμφανίζεται
+# είτε ο πίνακας costs είτε ο πίνακας losses
+# όταν είνα Τrue εμφανίζεται ο costs αντίθετα ο losses
+if "show_costs" not in st.session_state:
+    st.session_state.show_costs = True
+
+if "upload_version_main_upload_container" not in st.session_state:
+    st.session_state.upload_version_main_upload_container = 0
+
+
 # Τώρινος χρόνος
 current_year = datetime.now().year
 
@@ -73,9 +101,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-
-
-
 # Τροποποίηση των τίτλων
 st.markdown("""
     <style>
@@ -95,8 +120,6 @@ st.markdown("""
         
     </style>
 """,unsafe_allow_html=True)
-
-
 
 
 # Customize τα κουμπιά του UI (GLOBAL)
@@ -128,10 +151,7 @@ st.markdown(
                 color: #ffffff !important;
             
             }
-
-                               
-            
-            
+    
         </style>
     """
 ,unsafe_allow_html=True)
@@ -169,71 +189,57 @@ st.markdown(
 
 
 # Customize upload button global
-st.markdown("""
+st.markdown(f"""
     <style>
 
-        .st-key-upload-button-global label{
+        .st-key-upload-button-global-{st.session_state.upload_version} label{{
             display:none !important;
-        }
+        }}
 
         /* εξατομίκεση button (section) */
-        .st-key-upload-button-global section{
+        .st-key-upload-button-global-{st.session_state.upload_version} section{{
             background-color: transparent !important;
             display: flex !important;
             flex-direction: column !important;
-            padding: 0 !important;
             justify-content: flex-end !important;
             text-align:center;
            
-        }
+        }}
 
         /* αφαίρεση instruction (200 MB etc) */
-        [data-testid="stFileUploaderDropzoneInstructions"] {
+        [data-testid="stFileUploaderDropzoneInstructions"] {{
             display: none !important;
-        }
+        }}
 
         /* εξατομίκεση κουμπιού */
-        div.st-key-upload-button-global [data-testid="stFileUploaderDropzone"] button { 
+        div.st-key-upload-button-global-{st.session_state.upload_version} [data-testid="stFileUploaderDropzone"] button {{ 
             background-color: #151E2A !important;
-            box-shadow: none !important;
-            width: 1rem !important;
-              
-        }
+            box-shadow: none !important;             
+        }}
 
         /* μέγεθος του upload icon */
-        div.st-key-upload-button-global [data-testid="stFileUploaderDropzone"] button *{ 
+        div.st-key-upload-button-global-{st.session_state.upload_version} [data-testid="stFileUploaderDropzone"] button *{{ 
             font-size: 20px;        
-        }
+        }}
         
-        div.st-key-upload-button-global [data-testid="stFileUploaderDropzone"] button [data-testid="stMarkdownContainer"] {
-            display: none !important;
-        }
-
-       
-
         /* εξατομίκεση κουμπιού σε state hover */
-        div.st-key-upload-button-global [data-testid="stFileUploaderDropzone"] button:hover {
+        div.st-key-upload-button-global-{st.session_state.upload_version} [data-testid="stFileUploaderDropzone"] button:hover {{
             color: white;
             background-color: #151E2A !important;    
-        }
+        }}
 
-        div[data-testid="stFileChip"]{ 
-            display: none;
-        }
+        /* κάνων match το χρώμα του background με το background χρώμα της σελίδας */
+        div[data-testid="stFileUploader"] section {{ 
+            background:transparent !important;
+        }}
 
-        /* εξατομίκεση κειμένου μέσα στο κουμπί σε state hover */
-        div.st-key-upload-button-global [data-testid="stFileUploaderDropzone"] button:hover div  {
-            animation: textScale 0.2s forwards;
-        }
+        div[data-testid="stFileUploader"] {{ 
+            display:flex !important;
+            text-align:center !important;
+            justify-content: center !important;
+        }}
 
-        @keyframes textScale {
-            from {
-                transform: scale(1);
-            }
-            to {
-                transform: scale(1.4);
-            }
-        }
+        
     </style>
 """,unsafe_allow_html=True)
 
@@ -556,7 +562,7 @@ with st.sidebar:
         
     )
 
-    #st.button("delete all", on_click=utils.delete_all)
+    st.button("delete all", on_click=utils.delete_all)
 
     # Ανάλογα με την επιλογή το selectbox, εμφανίζεται το αντίστοιχο κουμπί
     # ώστε να κατεβάσει ο χρήστης το αντίστοιχο CSV
@@ -633,8 +639,14 @@ with st.sidebar:
 
 # upload button 
 def upload_button():
-    return st.file_uploader("", type="csv",  key="upload-button-global", accept_multiple_files=True, on_change=st.rerun)
+    return st.file_uploader("", type="csv",  key=f"upload-button-global-{st.session_state.upload_version}", accept_multiple_files=True)
 
+# Ανανέωνει την τιμή του upload button
+# με αύτον τον τρόπο γίνεται reset.
+# Έτσι διαγράφονται από το κουμπί
+# τα αρχεία που έχουν ανεβεί
+def increment_upload_button_key():
+    st.session_state.upload_version += 1
 
 # upload file container  
 def upload_file_container(required_text):
@@ -706,45 +718,45 @@ def upload_file_container(required_text):
                     <p>Download a template to get started, fill in your figures, and upload the file.</p>
                 </div>
             """,unsafe_allow_html=True,)
-            st.markdown("""
+            st.markdown(f"""
                 <style>
 
                 /* εξατομίκευση μπλέ container */
-                .st-key-upload-container {
+                .st-key-upload-container {{
                     background-color: #151D29 !important;
                     display: flex;
                     border: 1px solid rgba(41, 181, 232, 0.3) !important;
                     border-radius: 16px !important;
                     padding: 24px !important;
                     justify-content: center;
-                }
+                }}
                 /* εξατόμικευση upload button */
-                .st-key-upload-button {
+                .st-key-upload_button_{st.session_state.upload_version} {{
                     justify-content: center !important;
                     align-items: center !important;
                              
-                }
+                }}
                         
-                .st-key-upload-button label{
+                .st-key-upload_button_{st.session_state.upload_version} label{{
                     display:none !important;
-                }
+                }}
 
-                .st-key-upload-button section {
+                .st-key-upload_button_{st.session_state.upload_version} section {{
                     background-color: #151D29 !important;           
-                }
+                }}
 
                 /* εξατόμικευση div στο οποίο περικλείετε το upload button */
-                div.st-key-upload-button { 
+                div.st-key-upload_button_{st.session_state.upload_version} {{ 
                     display:flex;
                     text-align:center;
                     justify-content: center;
-                }
+                }}
                 </style>
                     
             """,unsafe_allow_html=True,)
 
             # upload button
-            uploaded_file = st.file_uploader("", type=["csv"], key="upload-button", accept_multiple_files=True)
+            uploaded_file = st.file_uploader("", type=["csv"], key=f"upload_button_{st.session_state.upload_version}", accept_multiple_files=True, on_change=st.rerun)
                 
             for file in uploaded_file:
                 dataframe = pd.read_csv(file)
@@ -757,8 +769,70 @@ def upload_file_container(required_text):
                     st.error(body=result)            
                 else:
                     
-                    st.success("Data has been added successfully")
+                    st.success(f"{file.name} has been added successfully")
 
+# Χρησιμοποιείτε για να κανει ο χρήστης upload αρχεία
+def upload_container_for_individual_page():
+    st.markdown("""
+        <div class="main-data-import-info">
+            <svg width="68" height="68" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" />
+                <polyline points="14 2 14 8 20 8" />
+                <path d="M12 18V12" />
+                <path d="M9 15L12 12L15 15" />
+            </svg>
+            <!-- Title div -->
+            <div class="card-title-data-import">Data Import</div>
+            <!-- Subheader div -->
+            <div class="card-subtitle-data-import">Upload files and log your entries instantly.</div>      
+        </div>       
+    """,unsafe_allow_html=True,)
+            
+    st.markdown("""
+        <style>
+       
+            /* κάνω center το κείμενο και το icon */
+            .main-data-import-info { 
+                display:flex;
+                flex-direction:column;
+                align-items: center;
+                justify-content: center;
+                gap:1.20rem;
+            }
+            
+            .card-title-data-import { 
+                font-size: 26px;
+                font-weight: bold;
+                letter-spacing: 0.5px;
+            }
+
+            .card-subtitle-data-import{ 
+                color: #909294;   
+            }
+        </style>
+                    
+    """,unsafe_allow_html=True,)
+        
+    # upload button
+    uploaded_files = upload_button()
+    for file in uploaded_files:
+        file_identifier = (file.name, file.size, st.session_state.upload_version)
+        if file_identifier not in st.session_state.processed_files:
+            dataframe = pd.read_csv(file)
+                
+            # Για κάθε CSV το κάνω format με το module loader
+            # ανάλογα με το text το οποίο επιστραφεί εμφανίζεται το αντίστοιχο μήνυμα
+            result = loader.add_to_database(dataframe)
+            # Περίπτωση όπου τα δεδομένα δεν είναι σωστά
+            
+            if result != "data has been added":
+                st.error(body=result)            
+            else:    
+                st.session_state.processed_files.add(file_identifier)
+                st.success(f"{file.name} added successfully")
+                
+        else:
+            st.info("File has already been uploaded!")
 
 # ================================================================
 
@@ -1263,22 +1337,6 @@ def open_add_loss_entry_form():
             st.rerun()
 
 
-
-
-
-# Η παρακάτω μεταβλητή χρησιμοποιείτε ώστε να εμφανίζεται
-# είτε ο πίνακας costs είτε ο πίνακας losses
-# όταν είνα Τrue εμφανίζεται ο costs αντίθετα ο losses
-if "show_costs" not in st.session_state:
-    st.session_state.show_costs = True
-
-# Αλλάζει την τιμή της st.session_state.show_costs
-# το not χρησιμοποιείτε ώστε να αντιστρέφεται η τιμή,
-# μια καθολική τιμή όπως : st.session_state.show_costs = False
-# θα επέφαιρε πάντα το ίδιο αποτέλεσμα
-
-
-
 #st.markdown("""
 #<style>
 #    /* Target every column container in the main view */
@@ -1306,9 +1364,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
+# Καλείτε όταν δεν υπάρχουν καταχωρημένα δεδομένα
 def no_data_text():
-
-    
 
    #with center_col:
         # μαύρο container
@@ -1326,7 +1383,7 @@ def no_data_text():
                     <!-- Title div -->
                     <div class="card-title-nothing-here">Nothing here yet</div>
                     <!-- Subheader div -->
-                    <div class="card-subtitle-add-data">Add data above to see your analytics.</div>      
+                    <div class="card-subtitle-add-data">Add data to see your analytics.</div>      
                 </div>
                 
                 
@@ -1405,11 +1462,13 @@ def no_data_text():
                     st.error(body=result)            
                 else:
                     
-                    st.success("Data has been added successfully")    
+                    st.success(f"{file.name} has been added successfully")
+                    time.sleep(2)
+                    st.rerun()    
     
     
     
-            
+        
        
 
 
@@ -1424,23 +1483,165 @@ def render_costs_losses():
 
     st.title("Costs & Losses")
     
-    _, btnc = st.columns([5,2])
+    c1, c2, c3 = st.columns(3)
+     
+    # METRICS
+    with c1:        
+        with st.container(border=True):
+            st.metric("Total Costs & Losses", f"{database.get_total_losses_year() + database.get_total_costs_year():,.2f}€", delta=utils.calculate_percentage_difference_for_costs_and_losses(), format="percent", delta_description="vs. last years", delta_color="inverse")
+    with c2:        
+        with st.container(border=True):
+            st.metric("Total Costs", f"{database.get_total_costs_year():,.2f}€",  delta=utils.calculate_percentage_difference_for_costs(), format="percent", delta_description="vs. last years", delta_color="inverse")
+    with c3:
+        with st.container(border=True):
+            st.metric("Total Losses", f"{database.get_total_losses_year():,.2f}€",   delta=utils.calculate_percentage_difference_for_losses(), format="percent", delta_description="vs. last years", delta_color="inverse")
+        
+              
     
-        
-    with btnc:
-        _, addc, expc, impc = st.columns([4,2.5,1.2,1.2], vertical_alignment="bottom")
-        
-            
-        with expc:
-            st.markdown("""
-                <style>
-                    [data-testid="stDownloadButton"] > button { 
-                        background-color:red !important;
-                        
-                    }
-                </style>
-            """,unsafe_allow_html=True)
+    st.divider()
 
+    
+
+    
+
+    c1, c2 = st.columns([6, 1.7], vertical_alignment="top")
+    
+    with c1:
+            
+        searchc, _, tablec = st.columns([10,10,3], vertical_alignment="bottom")
+        # Search form
+        with searchc:
+            with st.form("form", border=False):
+                # Κάνω hide τα instruction τα οποία δίνει το streamlit στο text input (search query)
+                st.markdown(
+                    """
+                    <style>
+                        div[data-testid="stTextInput"] [data-testid="InputInstructions"] {
+                            display: none;
+                        }
+                    </style>
+                    """
+                    ,unsafe_allow_html=True)
+                fc1, fc2 = st.columns(2)
+                with fc1:
+                    search_query = st.text_input("Search entry", placeholder="Filter by description", label_visibility="collapsed")
+                with fc2:
+                    submit_button = st.form_submit_button(":material/search:")
+            if submit_button and search_query.strip():
+                render_search_query(search_query)
+        
+        # Tables costs & losses
+        with tablec:
+            def on_view_change():
+                st.session_state.cost_loss_view = st.session_state.cost_loss_selector
+              
+            
+            # Άναλογα με την επιλογή του χρήστη εμφανίζεται ο αντίτοιχος πίνακας
+            
+            view_filter = st.segmented_control(
+                "Filter View",
+                options=["Costs", "Losses"],
+                default=st.session_state.cost_loss_view,   # Remembers past choice!
+                key="cost_loss_selector",                   # Distinct widget key
+                on_change=on_view_change,
+                label_visibility="collapsed",
+                required=True
+            )
+
+            
+            
+            if view_filter == "Costs":
+                with c1: 
+                    
+                    # Στην dataframe_costs επιστρέφεται ο πίνακας μέσω της get_losses_or_costs,
+                    # όπου ανάλογα την τιμή της παραμέτρου επιλέγει ποιόν πίνακα να επιστρέψει
+                    dataframe_costs = utils.get_losses_or_costs("costs")
+                    # σε περίπτωση που ο πίνακας είναι κενός 
+                    # εμφάνησε το παρακάτω μήνυμα
+                    if dataframe_costs.empty:
+                        _,col, _ = st.columns(3)
+                        with col:
+                            st.container(border=False, height=60)
+                            no_data_text()
+                    else:
+                        edited_df = st.data_editor(
+                            dataframe_costs, 
+                            num_rows="delete",
+                            height=428,
+                            disabled=list(dataframe_costs.columns.values),
+                            column_config={
+                                            "DATE" : st.column_config.DateColumn(format="DD/MM/YYYY"),
+                                            "ID" : st.column_config.NumberColumn(default=None, alignment="left")
+                                        }, 
+                            hide_index=True, column_order=["ID", "DATE", "DESCRIPTION", "COST", "CATEGORY", "NOTES"]
+                        )
+                        # Άφοτου ο χρήστης διαγράψει ένα entry μέσω του UI (data_editor), επιστρέφεται στην 
+                        # edited_df το καινούργιο dataframe χωρίς το row το οποίο διαγράφτηκε
+                        # Οπότε για να εντοπίσω ποιό row(s) διαγράφτηκε ακολουθώ τα παρακάτω βήματα :
+                        # 1) αρκέι να μεταρέψω τα ID του καινούργιου και του παλιού dataframe σε λίστες
+                        # 2) μετατρέπω τις λίστες σε sets
+                        # 3) Αποθηκεύω τα σβησμένα ids στην deleted_ids μέσω της αφαίρεσης των sets
+                        # (η αφαίρεση επιστρέφει όλα τα ids τα οποία υπάρχουν στην dataframe_costs αλλά δεν υπάρχουν στην edited_df)
+                        deleted_ids = set(dataframe_costs['ID'].to_list()) - set(edited_df['ID'].to_list())
+                        
+                        if deleted_ids:
+                           
+                            for id in deleted_ids:
+                                database.delete_cost_entry(id)
+                            increment_upload_button_key() # Κάνω reset το key έτισ ώστε να κάνει
+                                        # resetη τιμή του uploader και να
+                                        # μην καταχωρεί πάλι το αρχείο
+                                        # όταν σβήνει entries ο χρήστης
+                            st.rerun() 
+            else:
+                with c1:
+                    # Εμφάνησε τον πίνακα losses
+                    # σε περίπτωση που ο πίνακας είναι κενός 
+                    # εμφάνησε το παρακάτω μήνυμα
+                    dataframe_losses = utils.get_losses_or_costs("losses")
+                    if dataframe_losses.empty:
+                        _,col, _ = st.columns(3)
+                        with col:
+                            st.container(border=False, height=60)
+                            no_data_text()
+                    else:
+                        edited_df = st.data_editor(
+                            dataframe_losses, 
+                            num_rows="delete",
+                            height=428,
+                            disabled=list(dataframe_losses.columns.values),
+                            column_config={
+                                            "DATE" : st.column_config.DateColumn(format="DD/MM/YYYY"),
+                                            "ID" : st.column_config.NumberColumn(default=None, alignment="left")
+                                        }, 
+                            hide_index=True, column_order=["DATE", "DESCRIPTION", "LOSS", "CATEGORY", "NOTES"]
+                            
+                        )
+                        deleted_ids = set(dataframe_losses['ID'].to_list()) - set(edited_df['ID'].to_list())
+                        if deleted_ids:
+                            
+                            for id in deleted_ids:
+                                database.delete_loss_entry(id)
+                            
+                            increment_upload_button_key() # Κάνω reset το key έτισ ώστε να κάνει
+                                       # resetη τιμή του uploader και να
+                                       # μην καταχωρεί πάλι το αρχείο
+                                       # όταν σβήνει entries ο χρήστης
+                            st.rerun()   
+                            
+                            
+                          
+        
+           
+    with c2:
+        
+        st.container(border=False, height=1)
+        
+        
+        
+        _, c1, c2 = st.columns([2,0.9,2])
+        with c1:
+            
             if st.session_state.cost_loss_view == "Costs":
                 dataframe_costs = utils.get_losses_or_costs("costs")
                 # Σε περίπτωση που ο πίνακας με τα costs είναι κενός
@@ -1477,181 +1678,22 @@ def render_costs_losses():
                     ":material/Download:",
                     data= download_table,
                     file_name="losses.csv",
-                    mime="text/csv",
-                   
-                )
-
-        with impc:
-            uploaded_file = upload_button()
-
-            for file in uploaded_file:
-                dataframe = pd.read_csv(file)
-                    
-                # Για κάθε CSV το κάνω format με το module loader
-                # ανάλογα με το text το οποίο επιστραφεί εμφανίζεται το αντίστοιχο μήνυμα
-                result = loader.add_to_database(dataframe)
-                # Περίπτωση όπου τα δεδομένα δεν είναι σωστά
-                if result != "data has been added":
-                    st.error(body=result)            
-                
-                            
-                        
-    
-    st.divider()
-
-    
-
-    
-
-    c1, c2 = st.columns([6, 1.5], vertical_alignment="top")
-    
-    with c1:
-            
-        searchc, _, tablec = st.columns([10,10,3], vertical_alignment="bottom")
-        # Search form
-        with searchc:
-            with st.form("form", border=False):
-                # Κάνω hide τα instruction τα οποία δίνει το streamlit στο text input (search query)
-                st.markdown(
-                    """
-                    <style>
-                        div[data-testid="stTextInput"] [data-testid="InputInstructions"] {
-                            display: none;
-                        }
-                    </style>
-                    """
-                    ,unsafe_allow_html=True)
-                fc1, fc2 = st.columns(2)
-                with fc1:
-                    search_query = st.text_input("Search entry", placeholder="Filter by description", label_visibility="collapsed")
-                with fc2:
-                    submit_button = st.form_submit_button(":material/search:")
-            if submit_button and search_query.strip():
-                render_search_query(search_query)
-
-        # Tables costs & losses
-        with tablec:
-            def on_view_change():
-                st.session_state.cost_loss_view = st.session_state.cost_loss_selector
-              
-            
-            # Άναλογα με την επιλογή του χρήστη εμφανίζεται ο αντίτοιχος πίνακας
-            
-            view_filter = st.segmented_control(
-                "Filter View",
-                options=["Costs", "Losses"],
-                default=st.session_state.cost_loss_view,   # Remembers past choice!
-                key="cost_loss_selector",                   # Distinct widget key
-                on_change=on_view_change,
-                label_visibility="collapsed",
-                required=True
+                    mime="text/csv",            
             )
-
-            
-            
-            if view_filter == "Costs":
-                with c1: 
-
-                    # Στην dataframe_costs επιστρέφεται ο πίνακας μέσω της get_losses_or_costs,
-                    # όπου ανάλογα την τιμή της παραμέτρου επιλέγει ποιόν πίνακα να επιστρέψει
-                    dataframe_costs = utils.get_losses_or_costs("costs")
-                    # σε περίπτωση που ο πίνακας είναι κενός 
-                    # εμφάνησε το παρακάτω μήνυμα
-                    if dataframe_costs.empty:
-                        _,col, _ = st.columns(3)
-                        with col:
-                            st.container(border=False, height=60)
-                            no_data_text()
-                    else:
-                        edited_df = st.data_editor(
-                            dataframe_costs, 
-                            num_rows="delete",
-                            height=428,
-                            disabled=list(dataframe_costs.columns.values),
-                            column_config={
-                                            "DATE" : st.column_config.DateColumn(format="DD/MM/YYYY"),
-                                            "ID" : None
-                                        }, 
-                            hide_index=True, column_order=["DATE", "DESCRIPTION", "COST", "CATEGORY", "NOTES"]
-                        )
-                        # Άφοτου ο χρήστης διαγράψει ένα entry μέσω του UI (data_editor), επιστρέφεται στην 
-                        # edited_df το καινούργιο dataframe χωρίς το row το οποίο διαγράφτηκε
-                        # Οπότε για να εντοπίσω ποιό row(s) διαγράφτηκε ακολουθώ τα παρακάτω βήματα :
-                        # 1) αρκέι να μεταρέψω τα ID του καινούργιου και του παλιού dataframe σε λίστες
-                        # 2) μετατρέπω τις λίστες σε sets
-                        # 3) Αποθηκεύω τα σβησμένα ids στην deleted_ids μέσω της αφαίρεσης των sets
-                        # (η αφαίρεση επιστρέφει όλα τα ids τα οποία υπάρχουν στην dataframe_costs αλλά δεν υπάρχουν στην edited_df)
-                        deleted_ids = set(dataframe_costs['ID'].to_list()) - set(edited_df['ID'].to_list())
-                        if deleted_ids:
-                            for id in deleted_ids:
-                                database.delete_cost_entry(id)
-                            st.rerun()    
-            else:
-                with c1:
-                    # Εμφάνησε τον πίνακα losses
-                    # σε περίπτωση που ο πίνακας είναι κενός 
-                    # εμφάνησε το παρακάτω μήνυμα
-                    dataframe_losses = utils.get_losses_or_costs("losses")
-                    if dataframe_losses.empty:
-                        _,col, _ = st.columns(3)
-                        with col:
-                            st.container(border=False, height=60)
-                            no_data_text()
-                    else:
-                        edited_df = st.data_editor(
-                            dataframe_losses, 
-                            num_rows="delete",
-                            height=428,
-                            disabled=list(dataframe_losses.columns.values),
-                            column_config={
-                                            "DATE" : st.column_config.DateColumn(format="DD/MM/YYYY"),
-                                            "ID" : None
-                                        }, 
-                            hide_index=True, column_order=["DATE", "DESCRIPTION", "LOSS", "CATEGORY", "NOTES"]
-                            
-                        )
-                        deleted_ids = set(dataframe_losses['ID'].to_list()) - set(edited_df['ID'].to_list())
-                        if deleted_ids:
-                            for id in deleted_ids:
-                                database.delete_loss_entry(id)
-                            st.rerun()
-        
-       
-            
-            
-        
-        
-        
-            
-    with c2:
-        
-        st.container(border=False, height=1)
-        
-        _,btnc = st.columns([2,1.50])
-        with btnc:
+        with c2:
             # Πρόσθεσε entries στους πίνακες costs και losses             
             if st.session_state.cost_loss_view == "Costs":
-                if st.button(":material/arrow_insert:  Add Cost", width=200):
+                if st.button(":material/arrow_insert:  Add Cost"):
                     open_add_cost_entry_form()
             else:
                 if st.button(":material/arrow_insert:  Add Loss"):
                     open_add_loss_entry_form() 
-       
-            
 
-        
-        
-        # METRICS
-        
-        with st.container(border=True):
-            st.metric("Total Costs & Losses", f"{database.get_total_losses_year() + database.get_total_costs_year():,.2f}€", delta=utils.calculate_percentage_difference_for_costs_and_losses(), format="percent", delta_description="vs. last years", delta_color="inverse")
-        with st.container(border=True):
-            st.metric("Total Costs", f"{database.get_total_costs_year():,.2f}€",  delta=utils.calculate_percentage_difference_for_costs(), format="percent", delta_description="vs. last years", delta_color="inverse")
-        with st.container(border=True):
-            st.metric("Total Losses", f"{database.get_total_losses_year():,.2f}€",   delta=utils.calculate_percentage_difference_for_losses(), format="percent", delta_description="vs. last years", delta_color="inverse")
-            
-        
-
+        # Upload Container
+        with st.container(border=True, height=428):
+            upload_container_for_individual_page()
+                          
+                 
 
 
     barcol1, donutcol = st.columns(2)
@@ -1917,9 +1959,9 @@ def open_add_pending_earning_entry_form():
 
 def render_earnings():
     
-    # Περίπτωση όπου οι πίνακες costs και losses είναι κενοί 
-    if not(database.get_earnings()):
-        upload_file_container("required Earnings CSV")
+    # Περίπτωση όπου οι earnings και pending earnings είναι κενοί
+    if (not(database.get_earnings())) and (not(database.get_pending_earnings())):
+        upload_file_container("required Pending Earnings or Earnings CSV")
         st.stop()
     
     # Κάνω hide τα instruction τα οποία δίνει το streamlit στο text input (search query)
@@ -1946,55 +1988,70 @@ def render_earnings():
             st.metric("Total Net Profit", f"{database.get_total_net_profit_of_a_year():,.2f}€", delta=utils.calculate_percentage_difference_for_net_profit(), format="percent", delta_description="vs. all past years")  
     st.divider()
 
-    top_left_col, top_right_col = st.columns([5, 4], vertical_alignment="bottom")
+    top_left_col, _,top_right_col = st.columns([3.2, 5, 1.5], vertical_alignment="bottom")
     with top_left_col:
         
-        search_col, btn_col1, btn_col2 = st.columns([6.5, 1.7, 0.7], vertical_alignment="bottom")
-        with search_col:
-            with st.form("form", border=False):
+        
+        with st.form("form", border=False):
                 
-                fc1, fc2 = st.columns(2)
-                with fc1:
-                    search_query = st.text_input("Search entry", placeholder="Filter by description", label_visibility="collapsed")
-                with fc2:
-                    submit_button = st.form_submit_button(":material/search:")
+            fc1, fc2 = st.columns(2)
+            with fc1:
+                search_query = st.text_input("Search entry", placeholder="Filter by description", label_visibility="collapsed")
+            with fc2:
+                submit_button = st.form_submit_button(":material/search:")
             if submit_button and search_query.strip():
                 render_search_query(search_query)
-            
-        with btn_col1:     
-            if st.button(":material/arrow_insert: Add Earnings", type="secondary"):
-                open_add_earning_entry_form()
-        with btn_col2:
+
+    with top_right_col:
+        _, btn_col1, btn_col2 = st.columns([0.2,1.1,2.6])
+        with btn_col1:
             dataframe_earnings = utils.get_earnings()
+            if dataframe_earnings.empty:
+                download_table = utils.download_csv("earnings").to_csv(index=False).encode("utf-8")
+            else:
+                
+                dataframe_earnings = dataframe_earnings.drop(columns=["ID"])
+                download_table = dataframe_earnings.to_csv(index=False)
+            
             st.download_button(
-                ":material/download:",
-                dataframe_earnings.to_csv(index=False),
+                ":material/Download:",
+                data = download_table,
                 file_name="earnings.csv",
                 mime="text/csv",
-                key="export_losses"
             )
+        
+        with btn_col2:     
+            if st.button(":material/arrow_insert: Add Earning", type="secondary"):
+                open_add_earning_entry_form()
+        
     
-
+    if dataframe_earnings.empty:
+        _,col, _ = st.columns(3)
+        with col:
+            st.container(border=False, height=60)
+            no_data_text()
+            
          
                     
-    body_left, body_right = st.columns([5, 4])
+    body_left, body_right = st.columns([6, 1.7], vertical_alignment="top")
 
     with body_left:
         # Earnings table
         if dataframe_earnings.empty:
-            st.write("There are no data.")
+            pass
         else:
+            dataframe_earnings = utils.get_earnings()
             edited_df = st.data_editor(
                 dataframe_earnings, 
                 num_rows="delete",
-                height=650,
+                height=428,
                 disabled=list(dataframe_earnings.columns.values),
                 column_config={
                                 "DATE" : st.column_config.DateColumn(format="DD/MM/YYYY"),
-                                "ID" : None,
-                                "ROI": st.column_config.ProgressColumn(min_value=0, max_value=100)
+                                "ID": st.column_config.NumberColumn(default=None, alignment="left"),
+                                "ROI": st.column_config.ProgressColumn(min_value=0,max_value=100,format="%.1f%%"),
                             }, 
-                hide_index=True, column_order=['DATE', 'CATEGORY', 'PROFIT', 'DESCRIPTION', 'ROI', 'NOTES']
+                hide_index=True, column_order=['ID', 'DATE', 'CATEGORY', 'PROFIT', 'DESCRIPTION', 'ROI', 'NOTES']
             )
 
 
@@ -2004,92 +2061,95 @@ def render_earnings():
                     database.delete_earning_entry(id)
                 st.rerun()
 
-        # Area chart για Earnings vs. Costs & Losses 
-        with body_right:
-            
-            with st.container(border=True):
-                st.subheader("Earnings vs. Costs & Losses (Annual Comparison)")
-
-                # Συνολικό gross profit για κάθε χρόνο 
-                data_gross = database.get_gross_profit_each_year()
-                # Συνολικό πόσο για costs & losses για κάθε χρόνο
-                data_costs = database.get_cost_losses_each_year()
-               
-                
-                # περιέχει μόνο το costs&losses ποσό
-                data_costs_list = [element[1] for element in data_costs]
-                
-                if not data_costs_list:
-                    st.write("please add cost losses")
-                    st.stop()
-
-                dataframe_earnigns_cost_losses = pd.DataFrame(data_gross, columns=['YEAR', 'EARNINGS'])
-                
-                dataframe_earnigns_cost_losses['COSTS_LOSSES'] = data_costs_list
-                
-                fig = go.Figure()
-                # --- EARNINGS LINE ---
-                fig.add_trace(
-                    go.Scatter(
-                        x=dataframe_earnigns_cost_losses["YEAR"],
-                        y=dataframe_earnigns_cost_losses["EARNINGS"],
-                        name="Earnings",
-                        mode="lines+markers",
-                        line=dict(color="#10B981", width=3.5, shape="spline"),
-                        marker=dict(size=8, color="#10B981", symbol="circle"),
-                        fill="tozeroy",
-                        fillcolor="rgba(16, 185, 129, 0.08)",
-                        hovertemplate="<b>Earnings</b><br>Year: %{x}<br>Amount: %{y:,.2f}€<extra></extra>",
-                    )
-                )
-                # --- COSTS & LOSSES LINE ---
-                fig.add_trace(
-                    go.Scatter(
-                        x=dataframe_earnigns_cost_losses["YEAR"],
-                        y=dataframe_earnigns_cost_losses["COSTS_LOSSES"],
-                        name="Costs & Losses",
-                        mode="lines+markers",
-                        line=dict(color="#FB7185", width=3.5, shape="spline"),
-                        marker=dict(size=8, color="#FB7185", symbol="circle"),
-                        fill="tozeroy",
-                        fillcolor="rgba(251, 113, 133, 0.08)",
-                        hovertemplate="<b>Costs & Losses</b><br>Year: %{x}<br>Amount: %{y:,.2f}€<extra></extra>",
-                    )
-                )
-                # Customization του chart
-                fig.update_layout(
-                    height=557,
-                    hovermode="x unified",
-                    paper_bgcolor="rgba(0,0,0,0)",
-                    plot_bgcolor="rgba(0,0,0,0)",
-                    margin=dict(l=20, r=20, t=20, b=20),
-                    xaxis=dict(
-                        type="category",
-                        tickangle=0,
-                        tickfont=dict(size=14, color="#94A3B8"),
-                        showgrid=False,
-                        showline=True,
-                        linecolor="#334155",
-                    ),
-                    yaxis=dict(
-                        tickfont=dict(size=13, color="#94A3B8"),
-                        showgrid=True,
-                        gridcolor="#1E293B",
-                        zeroline=True,
-                        zerolinecolor="#334155",
-                    ),
-                    legend=dict(
-                        orientation="h",
-                        yanchor="bottom",
-                        y=1.02,
-                        xanchor="right",
-                        x=1,
-                        font=dict(size=14, color="#E2E8F0"),
-                    ),
-                )
-
-                # rendering chart
-                st.plotly_chart(fig, use_container_width=True)
+        ## Area chart για Earnings vs. Costs & Losses 
+    with body_right:
+        if database.get_earnings():
+            with st.container(border=True, height=428):
+                upload_container_for_individual_page()
+#
+        #with st.container(border=True):
+        #        
+        #    st.subheader("Earnings vs. Costs & Losses (Annual Comparison)")
+        #    
+        #    # Συνολικό gross profit για κάθε χρόνο 
+        #    data_gross = database.get_gross_profit_each_year()
+        #    # Συνολικό πόσο για costs & losses για κάθε χρόνο
+        #    data_costs = database.get_cost_losses_each_year()
+        #       
+        #        
+        #    # περιέχει μόνο το costs&losses ποσό
+        #    data_costs_list = [element[1] for element in data_costs]
+        #        
+        #    if not data_costs_list:
+        #        st.write("please add cost losses")
+        #        st.stop()
+#
+        #    dataframe_earnigns_cost_losses = pd.DataFrame(data_gross, columns=['YEAR', 'EARNINGS'])
+        #    dataframe_earnigns_cost_losses['COSTS_LOSSES'] = data_costs_list
+        #        
+        #    fig = go.Figure()
+        #    # --- EARNINGS LINE ---
+        #    fig.add_trace(
+        #        go.Scatter(
+        #            x=dataframe_earnigns_cost_losses["YEAR"],
+        #            y=dataframe_earnigns_cost_losses["EARNINGS"],
+        #            name="Earnings",
+        #            mode="lines+markers",
+        #            line=dict(color="#10B981", width=3.5, shape="spline"),
+        #            marker=dict(size=8, color="#10B981", symbol="circle"),
+        #            fill="tozeroy",
+        #            fillcolor="rgba(16, 185, 129, 0.08)",
+        #            hovertemplate="<b>Earnings</b><br>Year: %{x}<br>Amount: %{y:,.2f}€<extra></extra>",
+        #        )
+        #    )
+        #    # --- COSTS & LOSSES LINE ---
+        #    fig.add_trace(
+        #        go.Scatter(
+        #            x=dataframe_earnigns_cost_losses["YEAR"],
+        #            y=dataframe_earnigns_cost_losses["COSTS_LOSSES"],
+        #            name="Costs & Losses",
+        #            mode="lines+markers",
+        #            line=dict(color="#FB7185", width=3.5, shape="spline"),
+        #            marker=dict(size=8, color="#FB7185", symbol="circle"),
+        #            fill="tozeroy",
+        #            fillcolor="rgba(251, 113, 133, 0.08)",
+        #            hovertemplate="<b>Costs & Losses</b><br>Year: %{x}<br>Amount: %{y:,.2f}€<extra></extra>",
+        #        )
+        #    )
+        #    # Εξατομικευση chart
+        #    fig.update_layout(
+        #        height=557,
+        #        hovermode="x unified",
+        #        paper_bgcolor="rgba(0,0,0,0)",
+        #        plot_bgcolor="rgba(0,0,0,0)",
+        #        margin=dict(l=20, r=20, t=60, b=20),
+        #        xaxis=dict(
+        #            type="category",
+        #            tickangle=0,
+        #            tickfont=dict(size=14, color="#94A3B8"),
+        #            showgrid=False,
+        #            showline=True,
+        #            linecolor="#334155",
+        #        ),
+        #        yaxis=dict(
+        #            tickfont=dict(size=13, color="#94A3B8"),
+        #            showgrid=True,
+        #            gridcolor="#1E293B",
+        #            zeroline=True,
+        #            zerolinecolor="#334155",
+        #        ),
+        #        legend=dict(
+        #            orientation="h",
+        #            yanchor="bottom",
+        #            y=1.02,
+        #            xanchor="right",
+        #            x=1,
+        #            font=dict(size=14, color="#E2E8F0"),
+        #        ),
+        #    )
+#
+        #    # rendering chart
+        #    st.plotly_chart(fig, use_container_width=True)
     
     
     with st.container(border=True):
@@ -2106,47 +2166,39 @@ def render_earnings():
                     """, unsafe_allow_html=True)
         # --- Empty State ---
         if  not table_pending_earnings:
-            st.markdown(
-                            """
-                                <div style="
-                                    display: flex;
-                                    flex-direction: column;
-                                    align-items: center;
-                                    justify-content: center;
-                                    margin: 20px 0;
-                                    border-radius: 14px;
-                                    text-align: center;
-                                ">
-                                    <div style="
-                                        width: 64px;
-                                        height: 64px;
-                                        display: flex;
-                                        align-items: center;
-                                        justify-content: center;
-                                        border-radius: 50%;
-                                        background: rgba(41, 181, 232, 0.1);
-                                        border: 1px solid rgba(41, 181, 232, 0.25);
-                                        font-size: 28px;
-                                        margin-bottom: 16px;
-                                        margin-right:10px;
-                                    ">
-                                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" >
-                                            <rect x="3" y="3" width="18" height="18" rx="3" ry="3"></rect>
-                                            <polyline points="7 15 10 12 13 15 17 9"></polyline>
-                                            <polyline points="13 9 17 9 17 13"></polyline>
-                                        </svg>
-                                    </div>
-                                    <h3 style="color: #f3f4f6; font-size: 18px; font-weight: 600; margin-left:20px;">
-                                    No pending earnings found</h3>
-                                    <p style="
-                                        margin: 0;
-                                        color: #9ca3af;
-                                        font-size: 17px;
-                                        max-width: 320px;
-                                        line-height: 1.5;
-                                    ">There are currently no records tracked in this table.</p>
-                                </div>
-                """,unsafe_allow_html=True,)
+            st.markdown("""
+                <div style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 20px 0;
+                    border-radius: 14px;
+                    text-align: center;
+                ">
+                    <div style="
+                        width: 64px;
+                        height: 64px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        border-radius: 50%;
+                        background: rgba(41, 181, 232, 0.1);
+                        border: 1px solid rgba(41, 181, 232, 0.25);
+                        font-size: 28px;
+                        margin-bottom: 16px;
+                        margin-right:10px;
+                    ">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" >
+                            <rect x="3" y="3" width="18" height="18" rx="3" ry="3"></rect>
+                            <polyline points="7 15 10 12 13 15 17 9"></polyline>
+                            <polyline points="13 9 17 9 17 13"></polyline>
+                        </svg>
+                    </div>
+                    <h3 style="color: #f3f4f6; font-size: 18px; font-weight: 600; margin-left:20px;">No pending earnings found</h3>
+                    <p style="color: #9ca3af; font-size: 17px; max-width: 320px; margin:0;">There are currently no records tracked in this table.</p>
+                </div>
+            """,unsafe_allow_html=True,)
             
             btnc1, btc2 = st.columns([4,5.4],)
             with btc2:
@@ -2225,7 +2277,7 @@ def render_earnings():
                             row["CATEGORY"].iloc[0],
                             row["PROFIT"].iloc[0],
                             row["DESCRIPTION"].iloc[0],
-                            row["ROI"].iloc[0],
+                            int(row["ROI"].iloc[0]),
                             row["NOTES"].iloc[0],
                             date,
                         )
@@ -2250,23 +2302,19 @@ def render_earnings():
                 num_rows="delete",
                 column_order=["ID", "PROFIT", "DESCRIPTION", "ROI", "DATE", "NOTES"],
                 column_config={
-                    "PROFIT": st.column_config.Column(
-                        "PROFIT EST."
-                    ),
-                    "ROI": st.column_config.ProgressColumn(
-                        min_value=0,
-                        max_value=100,
-                        format="%.1f"
-                    ),
+                    "PROFIT": st.column_config.Column("PROFIT EST."),
+                    "ROI": st.column_config.ProgressColumn(min_value=0, max_value=100, format="%.1f"),
                     "DATE": st.column_config.DateColumn("DATE OF SALE",format="DD/MM/YYYY",),
                     "CATEGORY": None,
                 },
             )
             deleted_ids = set(dataframe_pending_entries['ID'].to_list()) - set(edited_df['ID'].to_list())
+            
             if deleted_ids:
                 for id in deleted_ids:
                     database.delete_pending_earning_entry(id)
-                    st.rerun()
+                st.rerun()
+                
 
 
     # ROI Calculator και Calculator
@@ -2279,7 +2327,7 @@ def render_earnings():
             time_mode = st.menu_button(
                 "Investment time",
                 options=["Use Dates", "Use Length"],
-                icon="⏰", on_click=dates_or_lenght
+                icon=":material/timer:", on_click=dates_or_lenght
             )
             # ROI calculator
             with st.form("roi_calculator_form", border=False, enter_to_submit=False):
@@ -2373,10 +2421,13 @@ def render_earnings():
     # Βar chart για Gross Profits per year
 
     with barcol1:
+        data_gross = database.get_gross_profit_each_year()
+        if not data_gross:
+            st.stop()
         with st.container(border=True):
-            data = database.get_gross_profit_each_year()
-            year = [element[0] for element in data]
-            profits = [element[1] for element in data]
+            
+            year = [element[0] for element in data_gross]
+            profits = [element[1] for element in data_gross]
             profits = [f"{element:,.2f}" for element in profits]
             st.subheader("Gross Profits per year")
             figure = px.bar(
@@ -2398,10 +2449,13 @@ def render_earnings():
     # Βar chart για Net Profit per year
 
     with barcol2:
+        data_net = database.get_total_net_profit_of_each_year()
+        if not data_net:
+            st.stop()
         with st.container(border=True):
-            data = database.get_total_net_profit_of_each_year()
-            year = [element[0] for element in data]
-            profits = [element[1] for element in data]
+            
+            year = [element[0] for element in data_net]
+            profits = [element[1] for element in data_net]
             profits = [f"{element:,.2f}" for element in profits]
             st.subheader("Net Profit per year")
             figure = px.bar(
