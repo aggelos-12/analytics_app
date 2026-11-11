@@ -62,20 +62,20 @@ if "upload_version_main_upload_container" not in st.session_state:
 current_year = datetime.now().year
 
 # Κρύβω την πάνω μπάρα του streamlit (toolbox)
-st.markdown("""
-    <style>
-        
-        .block-container, [data-testid="stMainBlockContainer"] {
-            padding-top: 0 !important;
-            padding-bottom: 0 !important;
-            
-        }
-        [data-testid="stHeader"] {
-            display: none !important;
-        }
-        
-    </style>
-""", unsafe_allow_html=True)
+#st.markdown("""
+#    <style>
+#        
+#        .block-container, [data-testid="stMainBlockContainer"] {
+#            padding-top: 0 !important;
+#            padding-bottom: 0 !important;
+#            
+#        }
+#        [data-testid="stHeader"] {
+#            display: none !important;
+#        }
+#        
+#    </style>
+#""", unsafe_allow_html=True)
 
 
 # Αφαιρώ τα anchors από τους τίτλους και αφαρώ το default κενό
@@ -325,7 +325,11 @@ st.markdown("""
 
 # ================================================================
 
+
+
 #                           SIDEBAR
+
+
 
 # ================================================================
 time.sleep(0.05)
@@ -834,9 +838,14 @@ def upload_container_for_individual_page():
         else:
             st.info("File has already been uploaded!")
 
+
 # ================================================================
 
+
+
 #                       DASHBOARD PAGE
+
+
 
 # ================================================================
 
@@ -936,7 +945,7 @@ def render_dashboard():
     
 
     df_10_recent_trans = pd.DataFrame(database.get_10_recent_transactions(), columns=["DATE", "DESCRIPTION", "CATEGORY", "AMOUNT"])
-    #df = df_10_recent_trans["Amount"] 
+    
     with recent_transc:
         with st.container(border=True):
             st.subheader(":material/wallet: Recent Transactions")
@@ -967,7 +976,7 @@ def render_dashboard():
     # Ποσά
     values = [element for element in costs_for_current_month_df['AMOUNT']]
 
-    # Donut chart
+    #  ----------    DONUT CHART EXPENSE BREAKDOWN    ----------
     with donutc:
         with st.container(border=True, height=488):
             if costs_for_current_month_df.empty:
@@ -1105,7 +1114,7 @@ def render_dashboard():
     
     
 
-    # Bar chart για gross profit
+    #  ----------    BAR CHART GROSS PROFITS ΚΑΙ COSTS & LOSESS    ----------
     with st.container(border=True):
         
         fig = go.Figure()
@@ -1118,10 +1127,11 @@ def render_dashboard():
                 color='#0E1F1F',
                 line=dict(color="#10B981", width=1.5)
                 
-            ),opacity=1
+            ),
+            hovertemplate="<b>Gross Profits</b><br>Month: %{x}<br>Amount: %{y}<extra></extra>"
     
         ))
-        # Bar chart για cost&losses
+        
         fig.add_trace(go.Bar(
             y=cost_losses,
             x=months2,
@@ -1131,7 +1141,8 @@ def render_dashboard():
                 color='#212628',
                 line=dict(color="#FB7185", width=1.5)
                 
-            ),opacity=1
+            ),
+            hovertemplate="<b>Costs & Losses</b><br>Month: %{x}<br>Amount: %{y}<extra></extra>"
         ))
         
         # gross profit κείμενο κάτω από το bar chart
@@ -1212,11 +1223,11 @@ def render_dashboard():
         )
 
         fig.update_traces(
-            hovertemplate="<b>%{x}</b><br>%{y}<extra></extra>"
+            
         )          
         
-        fig.update_yaxes(title_text="Amount (€)", title_font=dict(size=22), tickfont=dict(size=16), tickprefix="€")
-        fig.update_xaxes(title_text="Month", title_font=dict(size=22), tickfont=dict(size=16))
+        fig.update_yaxes(title_font=dict(size=22), tickfont=dict(size=18, color="#94A3B8"), tickprefix="€")
+        fig.update_xaxes(title_font=dict(size=22), tickfont=dict(size=18, color="#94A3B8"), type="category")
         
         st.subheader("Performance")
         st.caption("Gross Profit vs Costs & Losses")
@@ -1283,7 +1294,11 @@ def render_search_query(search_query):
 
 # ================================================================
 
+
+
 #                       COSTS & LOSSES PAGE
+
+
 
 # ================================================================
 
@@ -1699,7 +1714,8 @@ def render_costs_losses():
     barcol1, donutcol = st.columns(2)
     
     CONTAINER_HEIGHT = 700
-    # Bar chart για Costs & Losses per year
+    
+    #  ----------    BAR CHART ΓΙΑ COSTS & LOSSES PER YEAR    ----------
     with barcol1:
         with st.container(border=True, height=CONTAINER_HEIGHT):
             data = database.get_cost_losses_2_columns()
@@ -1710,7 +1726,7 @@ def render_costs_losses():
                 y=data["LOSS"],
                 x=data["YEAR"],
                 name='Losses',
-                hovertemplate="<b>%{x}</b><br>%{y}<extra></extra>",
+                hovertemplate="<b>Losses</b><br>Year: %{x}<br>Amount: %{y}<extra></extra>",
                 marker=dict(
                     color='#0B132B',
                     line=dict(color="#3B82F6", width=1.5)
@@ -1721,7 +1737,7 @@ def render_costs_losses():
                 y=data["COST"],
                 x=data["YEAR"],
                 name='Costs',
-                hovertemplate="<b>%{x}</b><br>%{y}<extra></extra>",
+                hovertemplate="<b>Costs</b><br>Year: %{x}<br>Amount: %{y}<extra></extra>",
                 marker=dict(
                     color='#0E1726',
                     line=dict(color="#64748B", width=1.5)
@@ -1729,8 +1745,8 @@ def render_costs_losses():
             ))
             
             fig.update_layout(height=550, barcornerradius=8)
-            fig.update_yaxes(title_text="YEAR", title_font=dict(size=19), tickfont=dict(size=16),tickprefix="€")
-            fig.update_xaxes(title_text="Cost & Loss", title_font=dict(size=19), tickfont=dict(size=16))
+            fig.update_yaxes(title_font=dict(size=22), tickfont=dict(size=18, color="#94A3B8"), tickprefix="€")
+            fig.update_xaxes(title_font=dict(size=22), tickfont=dict(size=18, color="#94A3B8"), type="category")
             fig.update_traces(
                 hoverlabel=dict(
                     bgcolor="#292A33",
@@ -1757,7 +1773,7 @@ def render_costs_losses():
     
 
 
-    # Donut chart
+    #  ----------    DONUT CHART ΓΙΑ COSTS & LOSSES ΓΙΑ CURRENT YEAR    ----------
     with donutcol:
         with st.container(border=True, height=CONTAINER_HEIGHT):
             
@@ -1830,7 +1846,11 @@ def render_costs_losses():
 
 # ================================================================
 
+
+
 #                       EARNINGS PAGE
+
+
 
 # ================================================================
 
@@ -2061,95 +2081,12 @@ def render_earnings():
                     database.delete_earning_entry(id)
                 st.rerun()
 
-        ## Area chart για Earnings vs. Costs & Losses 
+ 
     with body_right:
         if database.get_earnings():
             with st.container(border=True, height=428):
                 upload_container_for_individual_page()
-#
-        #with st.container(border=True):
-        #        
-        #    st.subheader("Earnings vs. Costs & Losses (Annual Comparison)")
-        #    
-        #    # Συνολικό gross profit για κάθε χρόνο 
-        #    data_gross = database.get_gross_profit_each_year()
-        #    # Συνολικό πόσο για costs & losses για κάθε χρόνο
-        #    data_costs = database.get_cost_losses_each_year()
-        #       
-        #        
-        #    # περιέχει μόνο το costs&losses ποσό
-        #    data_costs_list = [element[1] for element in data_costs]
-        #        
-        #    if not data_costs_list:
-        #        st.write("please add cost losses")
-        #        st.stop()
-#
-        #    dataframe_earnigns_cost_losses = pd.DataFrame(data_gross, columns=['YEAR', 'EARNINGS'])
-        #    dataframe_earnigns_cost_losses['COSTS_LOSSES'] = data_costs_list
-        #        
-        #    fig = go.Figure()
-        #    # --- EARNINGS LINE ---
-        #    fig.add_trace(
-        #        go.Scatter(
-        #            x=dataframe_earnigns_cost_losses["YEAR"],
-        #            y=dataframe_earnigns_cost_losses["EARNINGS"],
-        #            name="Earnings",
-        #            mode="lines+markers",
-        #            line=dict(color="#10B981", width=3.5, shape="spline"),
-        #            marker=dict(size=8, color="#10B981", symbol="circle"),
-        #            fill="tozeroy",
-        #            fillcolor="rgba(16, 185, 129, 0.08)",
-        #            hovertemplate="<b>Earnings</b><br>Year: %{x}<br>Amount: %{y:,.2f}€<extra></extra>",
-        #        )
-        #    )
-        #    # --- COSTS & LOSSES LINE ---
-        #    fig.add_trace(
-        #        go.Scatter(
-        #            x=dataframe_earnigns_cost_losses["YEAR"],
-        #            y=dataframe_earnigns_cost_losses["COSTS_LOSSES"],
-        #            name="Costs & Losses",
-        #            mode="lines+markers",
-        #            line=dict(color="#FB7185", width=3.5, shape="spline"),
-        #            marker=dict(size=8, color="#FB7185", symbol="circle"),
-        #            fill="tozeroy",
-        #            fillcolor="rgba(251, 113, 133, 0.08)",
-        #            hovertemplate="<b>Costs & Losses</b><br>Year: %{x}<br>Amount: %{y:,.2f}€<extra></extra>",
-        #        )
-        #    )
-        #    # Εξατομικευση chart
-        #    fig.update_layout(
-        #        height=557,
-        #        hovermode="x unified",
-        #        paper_bgcolor="rgba(0,0,0,0)",
-        #        plot_bgcolor="rgba(0,0,0,0)",
-        #        margin=dict(l=20, r=20, t=60, b=20),
-        #        xaxis=dict(
-        #            type="category",
-        #            tickangle=0,
-        #            tickfont=dict(size=14, color="#94A3B8"),
-        #            showgrid=False,
-        #            showline=True,
-        #            linecolor="#334155",
-        #        ),
-        #        yaxis=dict(
-        #            tickfont=dict(size=13, color="#94A3B8"),
-        #            showgrid=True,
-        #            gridcolor="#1E293B",
-        #            zeroline=True,
-        #            zerolinecolor="#334155",
-        #        ),
-        #        legend=dict(
-        #            orientation="h",
-        #            yanchor="bottom",
-        #            y=1.02,
-        #            xanchor="right",
-        #            x=1,
-        #            font=dict(size=14, color="#E2E8F0"),
-        #        ),
-        #    )
-#
-        #    # rendering chart
-        #    st.plotly_chart(fig, use_container_width=True)
+
     
     
     with st.container(border=True):
@@ -2417,61 +2354,165 @@ def render_earnings():
    
 
     barcol1, barcol2 = st.columns(2)    
-
-    # Βar chart για Gross Profits per year
-
+    
+    #  ----------    BAR CHART ΓΙΑ GROSS & NET PROFITS PER YEAR    ----------
+    
     with barcol1:
         data_gross = database.get_gross_profit_each_year()
-        if not data_gross:
+        data_net = database.get_total_net_profit_of_each_year()
+        if (not data_gross) or (not data_net):
             st.stop()
+        
         with st.container(border=True):
+            figure = go.Figure()
+            df_merged_gross_net = utils.get_gross_net_profit_for_each_year_merged()
             
-            year = [element[0] for element in data_gross]
-            profits = [element[1] for element in data_gross]
-            profits = [f"{element:,.2f}" for element in profits]
-            st.subheader("Gross Profits per year")
-            figure = px.bar(
-                x=year,y=profits,
-                text=profits,
-                color_discrete_sequence=["#3B82F6"],
-                labels = {
-                    "x": "Year",
-                    "y": "Gross Profit"
-                }
+            st.subheader("Gross & Net Profits Per Year")
+            figure.add_trace(go.Bar(
+                    x=df_merged_gross_net["YEAR"].to_list(),
+                    y=df_merged_gross_net["GROSS"].to_list(),
+                    name='Gross Profit',
+                    hovertemplate="<b>Gross Profits</b><br>Year: %{x}<br>Amount: %{y}<extra></extra>",
+                    marker=dict(
+                        color='#0B132B',
+                        line=dict(color="#3B82F6", width=1.5)   
+                    )
+                )
             )
-            figure.update_yaxes(title_font_size=22, tickfont_size=17)
-            figure.update_xaxes(title_font_size=22, tickfont_size=17)
+
+            
+            figure.add_trace(go.Bar(
+                    x=df_merged_gross_net["YEAR"].to_list(),
+                    y=df_merged_gross_net["NET"].to_list(),
+                    name="Net Profit",
+                    hovertemplate="<b>Net Profits</b><br>Year: %{x}<br>Amount: %{y}<extra></extra>",
+                    marker=dict(
+                        color='#0E1F1F',
+                        line=dict(color="#10B981", width=1.5)  
+                    )
+                    
+                )
+            )
+            figure.update_yaxes(title_font=dict(size=22), tickfont=dict(size=18, color="#94A3B8"), tickprefix="€")
+            figure.update_xaxes(title_font=dict(size=22), tickfont=dict(size=18, color="#94A3B8"), type="category")
             figure.update_traces(textposition="outside", textfont_size=15, marker_cornerradius=10)
+            figure.update_layout(
+                hoverlabel=dict(
+                    bgcolor="#292A33",
+                    bordercolor="white",
+                    font_size=16,
+                    font_family='Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
+                    font_shadow="1px 1px 10px white"
+                ),
+                legend=dict(
+                    font=dict(size=15)
+                )           
+            )
+            
             st.plotly_chart(figure)   
 
             
 
-    # Βar chart για Net Profit per year
+    
+    #  ----------    LINE CHART ΓΙΑ EARNINGS VS COSTS & LOSSES PER YEAR    ----------
 
     with barcol2:
-        data_net = database.get_total_net_profit_of_each_year()
-        if not data_net:
-            st.stop()
         with st.container(border=True):
+                
+            st.subheader("Earnings vs. Costs & Losses (Annual Comparison)")
             
-            year = [element[0] for element in data_net]
-            profits = [element[1] for element in data_net]
-            profits = [f"{element:,.2f}" for element in profits]
-            st.subheader("Net Profit per year")
-            figure = px.bar(
-                x=year,y=profits,
-                color_discrete_sequence=["#10B981"],
-                text=profits,
-                labels = {
-                    "x": "Year",
-                    "y": "Net Profit"
-                }
+            # Συνολικό gross profit για κάθε χρόνο 
+            data_gross = database.get_gross_profit_each_year()
+            # Συνολικό πόσο για costs & losses για κάθε χρόνο
+            data_costs = database.get_cost_losses_each_year()
+               
+                
+            # περιέχει μόνο το costs&losses ποσό
+            data_costs_list = [element[1] for element in data_costs]
+                
+            if not data_costs_list:
+                st.write("please add cost losses")
+                st.stop()
+
+            dataframe_earnigns_cost_losses = pd.DataFrame(data_gross, columns=['YEAR', 'EARNINGS'])
+            dataframe_earnigns_cost_losses['COSTS_LOSSES'] = data_costs_list
+                
+            fig = go.Figure()
+            # --- EARNINGS LINE ---
+            fig.add_trace(
+                go.Scatter(
+                    x=dataframe_earnigns_cost_losses["YEAR"],
+                    y=dataframe_earnigns_cost_losses["EARNINGS"],
+                    name="Earnings",
+                    mode="lines+markers",
+                    line=dict(color="#10B981", width=3.5, shape="spline"),
+                    marker=dict(size=8, color="#10B981", symbol="circle"),
+                    fill="tozeroy",
+                    fillcolor="rgba(16, 185, 129, 0.08)",
+                    hovertemplate="<b>Earnings</b><br>Year: %{x}<br>Amount: %{y:,.2f}€<extra></extra>",
+                )
             )
-            figure.update_yaxes(title_font_size=22, tickfont_size=17)
-            figure.update_xaxes(title_font_size=22, tickfont_size=17)
-            #color = st.color_picker("Pick chart's color", "#B04141", key="colorpicker2")
-            figure.update_traces(textposition="outside", textfont_size=15,marker_cornerradius=10)
-            st.plotly_chart(figure)
+            # --- COSTS & LOSSES LINE ---
+            fig.add_trace(
+                go.Scatter(
+                    x=dataframe_earnigns_cost_losses["YEAR"],
+                    y=dataframe_earnigns_cost_losses["COSTS_LOSSES"],
+                    name="Costs & Losses",
+                    mode="lines+markers",
+                    line=dict(color="#FB7185", width=3.5, shape="spline"),
+                    marker=dict(size=8, color="#FB7185", symbol="circle"),
+                    fill="tozeroy",
+                    fillcolor="rgba(251, 113, 133, 0.08)",
+                    hovertemplate="<b>Costs & Losses</b><br>Year: %{x}<br>Amount: %{y:,.2f}€<extra></extra>",
+                )
+            )
+            # Εξατομικευση chart
+            fig.update_layout(
+                hovermode="x unified",
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                margin=dict(l=20, r=20, t=60, b=20),
+                xaxis=dict(
+                    type="category",
+                    tickfont=dict(size=18, color="#94A3B8"),
+                    showgrid=False,
+                    showline=True,
+                    linecolor="#334155",
+                    
+                ),
+                yaxis=dict(
+                    tickfont=dict(size=18, color="#94A3B8"),
+                    showgrid=True,
+                    gridcolor="#1E293B",
+                    zeroline=True,
+                    zerolinecolor="#334155",
+                    tickprefix="€"
+                ),
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom",
+                    y=1.02,
+                    xanchor="right",
+                    x=1,
+                    font=dict(size=15, color="#E2E8F0"),
+                ),
+                
+            )
+
+            fig.update_layout(
+                hoverlabel=dict(
+                    bgcolor="#292A33",
+                    bordercolor="white",
+                    font_size=14
+                )
+            )
+
+            
+            st.plotly_chart(fig)
+       
+            
+            
+            
         
 
 
@@ -2480,7 +2521,11 @@ def render_earnings():
 
 # ================================================================
 
+
+
 #                      INVESTMENTS PAGE
+
+
 
 # ================================================================
 

@@ -156,7 +156,6 @@ def get_gross_profit_each_year():
 def get_gross_profit_except_current_year(current_year):
     connection = get_connection()
     cursor = connection.cursor()
-    
     query = """
         SELECT SUM(PROFIT) FROM EARNINGS
         WHERE STRFTIME('%Y',DATE) != ?
@@ -775,13 +774,13 @@ def delete_all_losses_entry():
 
 
 if __name__ == "__main__":
+    pass
     #print(get_losses())
     #data = merge_costs_and_losses()
     #data = pd.DataFrame(data)
     #delete_all_investments_entry()
     #print(data)
-    df = pd.DataFrame(get_10_recent_transactions())
-    print(df)
+    #df = pd.DataFrame(get_10_recent_transactions())
     #print(get_total_costs_year(2026))
     #delete_all_earnings_entry()
     #delete_all_investments_entry()

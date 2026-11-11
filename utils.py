@@ -195,6 +195,19 @@ def get_costs_for_donut_chart():
     data = pd.DataFrame(data, columns=['CATEGORY', 'AMOUNT'])
     return data
 
+# Επιστρέφει το gross και net profit 
+# για κάθε χρόνο σε ένα κοινό πίνακα
+def get_gross_net_profit_for_each_year_merged():
+    data_gross = database.get_gross_profit_each_year()
+    data_net = database.get_total_net_profit_of_each_year()
+
+    df_gross = pd.DataFrame(data_gross, columns=["YEAR", "GROSS"])
+    df_net = pd.DataFrame(data_net, columns=["YEAR", "NET"])
+
+    df3 = pd.merge(df_gross, df_net, on="YEAR", how="outer")
+    df3 = df3.fillna(0)
+    return df3
+
 # Format function για τα CSVs
 @st.cache_data(show_spinner=False)
 def add_template_row(dataframe, table):
@@ -322,4 +335,6 @@ def delete_all():
 
 
 if __name__=='__main__':
-    print(calculate_percentage_difference_for_costs_and_losses())
+    df = get_gross_net_profit_for_each_year_merged()
+    
+    print(df["YEAR"].to_list())
