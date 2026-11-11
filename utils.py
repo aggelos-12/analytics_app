@@ -210,9 +210,9 @@ def get_gross_net_profit_for_each_year_merged():
 
 # Format function για τα CSVs
 @st.cache_data(show_spinner=False)
-def add_template_row(dataframe, table):
+def add_template_row(dataframe,table):
     if table == "earnings":
-        new_row = pd.Series({ 
+        template_row = pd.Series({ 
             "CATEGORY": "your category",
             "PROFIT": 0,
             "DESCRIPTION": "your description",
@@ -221,7 +221,7 @@ def add_template_row(dataframe, table):
             "DATE": "yyyy/mm/dd"
         })
     elif table == "costs":
-        new_row = pd.Series({ 
+        template_row = pd.Series({ 
             "DATE": "yyyy/mm/dd",
             "COST": 0.0,
             "DESCRIPTION": "your description",
@@ -230,7 +230,7 @@ def add_template_row(dataframe, table):
             
         })
     elif table == "losses":
-        new_row = pd.Series({
+        template_row = pd.Series({
             "CATEGORY": "your category",
             "LOSS": 0.0,
             "DESCRIPTION": "your description", 
@@ -239,7 +239,7 @@ def add_template_row(dataframe, table):
             
         })
     elif table == "investments":
-        new_row = pd.Series({
+        template_row = pd.Series({
             "DATE": "yyyy/mm/dd",
             "ENTRY": 0.0,
             "DESCRIPTION": "your description", 
@@ -249,7 +249,7 @@ def add_template_row(dataframe, table):
             "ACCOUNT": "your account"
         })
     elif table == "pearnings":
-        new_row = pd.Series({ 
+        template_row = pd.Series({ 
             "CATEGORY": "your category",
             "PROFIT": 0.0,
             "DESCRIPTION": "your description",
@@ -260,37 +260,41 @@ def add_template_row(dataframe, table):
         })        
 
 
-    dataframe = pd.concat([dataframe,new_row.to_frame().T])
+    dataframe = pd.concat([dataframe,template_row.to_frame().T])
     return dataframe
 
 
 
 def download_csv(table):
+    
     if table == "earnings":
         dataframe = get_earnings()
         if dataframe.empty:
             dataframe = add_template_row(dataframe, "earnings")
-            
+            return dataframe
     elif table == "costs":
         dataframe = get_losses_or_costs("costs")
         if dataframe.empty:
             dataframe = add_template_row(dataframe, "costs")
+            return dataframe
 
     elif table == "pearnings":
         dataframe = get_pending_earnings()
         if dataframe.empty:
             dataframe = add_template_row(dataframe, "pearnings")
-    
+            return dataframe
     elif table == "losses":
         dataframe = get_losses_or_costs("losses")
         if dataframe.empty:
             dataframe = add_template_row(dataframe, "losses")
-
+            return dataframe
     elif table == "investments":
         dataframe = get_investments()
         if dataframe.empty:
             dataframe = add_template_row(dataframe, "investments")
-    return dataframe
+            return dataframe
+        
+    return dataframe.drop(["ID"], axis=1)
 
 
 # Κάνει merge τα costs και τα losses
@@ -335,6 +339,5 @@ def delete_all():
 
 
 if __name__=='__main__':
-    df = get_gross_net_profit_for_each_year_merged()
-    
-    print(df["YEAR"].to_list())
+    a = get_losses_or_costs("costs")
+    print(a)

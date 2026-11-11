@@ -53,11 +53,11 @@ A modern, high-fidelity personal finance and portfolio tracking dashboard built 
 ├── assets/                  # Dashboard screenshots and UI assets
 │   ├── dashboard_overview_1.png
 │   ├── dashboard_overview_2.png
-│   ├── expenses_breakdown_1.png
-│   ├── expenses_breakdown_2.png
 │   ├── earnings_breakdown_1.png
 │   ├── earnings_breakdown_2.png
 │   ├── earnings_breakdown_3.png
+│   ├── expenses_breakdown_1.png
+│   ├── expenses_breakdown_2.png
 │   └── portfolio_tracking.png
 ├── database.db              # SQLite persistent storage (auto-initialized)
 ├── database.py              # Database connection, schemas, cached queries & CRUD logic

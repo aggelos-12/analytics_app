@@ -506,6 +506,24 @@ def get_investments_for_line_chart():
     connection.close()
     return entries
 
+# Επιστρέφει το συνολικο ποσό το οποίο
+# επενδύθηκε αυτό το μήνα
+#@st.cache_data(show_spinner=False)
+#def get_investments_amount_for_current_month():
+#    connection = get_connection()
+#    cursor = connection.cursor()
+#    cursor.execute("""
+#        SELECT SUM(ENTRY) FROM INVESTMENTS
+#        WHERE STRFTIME     
+#    """)
+#    data = cursor.fetchall()
+#    if not data:       
+#        connection.close()
+#        return [('EUR',)]
+#    else:
+#        connection.close()
+#        return data
+
 
 # Επιστρέφει τις πιο πρόσφατες συναλλάγες ανεξεραίτως κατηγορίας
 # (earnings, costs, losses)
@@ -774,7 +792,7 @@ def delete_all_losses_entry():
 
 
 if __name__ == "__main__":
-    pass
+    print(get_earnings())
     #print(get_losses())
     #data = merge_costs_and_losses()
     #data = pd.DataFrame(data)

@@ -592,9 +592,9 @@ with st.sidebar:
             )
         elif template == "Investments":
             st.download_button(
-                label="Ivestments",
+                label="Investments",
                 data=utils.download_csv("investments").to_csv(index=False).encode("utf-8"),
-                file_name="ivestments.csv",
+                file_name="investments.csv",
                 mime="text/csv",
                 icon=":material/download:",
                 type="primary" 
