@@ -1,6 +1,6 @@
 import database
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 import streamlit as st
 import pandas as pd
 
@@ -89,6 +89,33 @@ def calculate_percentage_difference_for_costs_and_losses():
 
     return percentage_diff
 
+
+def calculate_percentage_difference_for_investments():
+    today = datetime.today()
+    # Μπορώ να αποθηκεύσω τον ακριβώς προηγούμενο μήνα αρκεί
+    # μόνο να τροποποιήσω την ημερομινία ώστε να έχει ως μέρα 
+    # την πρώτη μέρα του τωρινού μήνα και μετά να αφαιρέσω μία
+    # μέρα απο αυτήν έτσι ώστε να πάει στον ακριβώς προηγούμενο
+    # μήνα
+    last_month_date = today.replace(day=1) - timedelta(days=1)
+    last_month = last_month_date.strftime("%m")
+    # Αποθηκεύω και τον χρόνο διότι αν ο μήνας είναι ο
+    # ιανουάριος ο ακριβώς προοηγούμενος είναι ο δεκέμβριους του
+    # προηγούμενου χρόνου
+    last_months_year = last_month_date.year
+
+    # Τύπος για υπολογισμός διαφοράς ποσοστού : ((new value - old value) / abs(old value)) * 100
+    # Δεν πολλαπλασίαζω με το 100 διότι το κάνει αυτόματα η st.metric 
+    current_value = database.get_investments_for_current_month(today.strftime("%m"), today.year)
+    past_value = database.get_investments_for_current_month(last_month, last_months_year)
+    print(current_value)
+    print(past_value)
+    if past_value == 0:
+        return None
+    percentage_diff = ((current_value - past_value) / abs(past_value))
+    return percentage_diff
+
+
 # Επιστρέφει τον πίνακα ΕARNINGS ως panas dataframe
 def get_earnings():
     # ο πίνκας ΕARNINGS σε μορφή [(element1), (element1)]
@@ -135,21 +162,21 @@ def get_losses_or_costs(choice):
         dataframe_costs = dataframe_costs.sort_values(by='DATE', ascending=False)
         return dataframe_costs
 
-# Επιστρέφει τον πίνακα INVESTMENTS ως panas dataframe
+# Επιστρέφει τον πίνακα INVESTMENTS ως pandas dataframe
 def get_investments():
-    current_date = datetime.today()
-    data_investmens = database.get_investments()
-    data_investmens = pd.DataFrame(data_investmens, columns=['ID', 'DATE', 'ENTRY', 'DESCRIPTION', 'AMOUNT', 'CURRENCY', 'PLATFORM', 'ACCOUNT'])
-    data_investmens['DATE'] = pd.to_datetime(data_investmens['DATE'], format='mixed')
+    #current_date = datetime.today()
+    data_investments = database.get_investments()
+    data_investments = pd.DataFrame(data_investments, columns=['ID', 'CATEGORY', 'DATE', 'ENTRY', 'DESCRIPTION', 'AMOUNT', 'CURRENCY', 'PLATFORM', 'ACCOUNT'])
+    data_investments['DATE'] = pd.to_datetime(data_investments['DATE'], format='mixed')
     #Σε περίπτωση όπου ο πίνακας είναι άδειος, διαγράφεται η στήλη ID
-    if data_investmens.empty:
-        return data_investmens.drop(columns=['ID'])
+    if data_investments.empty:
+        return data_investments.drop(columns=['ID'])
     
     # φιλτράρω τα δεδομένα έτσι ώστε να επιστρέφονται μόνο οι επενδύσεις οι οποίες είναι
     # ακόμα ενεργές βάση ημερομηνίας
-    data_investmens = data_investmens[data_investmens["DATE"] > current_date]
-    data_investmens = data_investmens.sort_values(by='DATE')
-    return data_investmens
+    #data_investments = data_investments[data_investments["DATE"] > current_date]
+    data_investments = data_investments.sort_values(by='DATE')
+    return data_investments
 
 # Επιστρέφει τον πίνακα INVESTMENTS ως panas dataframe με τις στήλες "DATE", "ENTRY", "DESCRIPTION", "CURRENCY"
 def get_investments_line_chart():
@@ -240,6 +267,7 @@ def add_template_row(dataframe,table):
         })
     elif table == "investments":
         template_row = pd.Series({
+            "CATEGORY": "your category",
             "DATE": "yyyy/mm/dd",
             "ENTRY": 0.0,
             "DESCRIPTION": "your description", 
@@ -339,5 +367,5 @@ def delete_all():
 
 
 if __name__=='__main__':
-    a = get_losses_or_costs("costs")
-    print(a)
+    print(get_categories(database.get_investments_categories))
+    

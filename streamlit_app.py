@@ -9,9 +9,11 @@ import time
 import plotly.graph_objects as go
 from datetime import timedelta
 import loader
+import os
 
 
-
+if not os.path.exists("database.db"):
+    database.initialize_database()
 
 
 
@@ -1588,7 +1590,7 @@ def render_costs_losses():
                                             "DATE" : st.column_config.DateColumn(format="DD/MM/YYYY"),
                                             "ID" : st.column_config.NumberColumn(default=None, alignment="left")
                                         }, 
-                            hide_index=True, column_order=["ID", "DATE", "DESCRIPTION", "COST", "CATEGORY", "NOTES"]
+                            hide_index=True, column_order=["DATE", "DESCRIPTION", "COST", "CATEGORY", "NOTES"]
                         )
                         # Άφοτου ο χρήστης διαγράψει ένα entry μέσω του UI (data_editor), επιστρέφεται στην 
                         # edited_df το καινούργιο dataframe χωρίς το row το οποίο διαγράφτηκε
@@ -2023,7 +2025,7 @@ def render_earnings():
                 render_search_query(search_query)
 
     with top_right_col:
-        _, btn_col1, btn_col2 = st.columns([0.2,1.1,2.6])
+        _, btn_col1, btn_col2 = st.columns([0.2,1,2.6])
         with btn_col1:
             dataframe_earnings = utils.get_earnings()
             if dataframe_earnings.empty:
@@ -2071,7 +2073,7 @@ def render_earnings():
                                 "ID": st.column_config.NumberColumn(default=None, alignment="left"),
                                 "ROI": st.column_config.ProgressColumn(min_value=0,max_value=100,format="%.1f%%"),
                             }, 
-                hide_index=True, column_order=['ID', 'DATE', 'CATEGORY', 'PROFIT', 'DESCRIPTION', 'ROI', 'NOTES']
+                hide_index=True, column_order=['DATE', 'CATEGORY', 'PROFIT', 'DESCRIPTION', 'ROI', 'NOTES']
             )
 
 
@@ -2186,7 +2188,7 @@ def render_earnings():
                 # Επιλογή μεταφοράς entry από τον πίνακα PENDGING_EARNINGS
                 # στον EARNINGS    
                 id_selection = st.selectbox(
-                    label="➡️ Settle to Earnings",
+                    label=":material/file_export: Settle to Earnings",
                     options=dataframe_pending_entries["ID"].to_list(),
                     placeholder="Select entries to settle...",
                     index=None,
@@ -2237,13 +2239,13 @@ def render_earnings():
                 dataframe_pending_entries,
                 hide_index=True,
                 num_rows="delete",
-                column_order=["ID", "PROFIT", "DESCRIPTION", "ROI", "DATE", "NOTES"],
+                column_order=["DATE", "CATEGORY", "PROFIT", "DESCRIPTION", "ROI",  "NOTES"],
                 column_config={
                     "PROFIT": st.column_config.Column("PROFIT EST."),
                     "ROI": st.column_config.ProgressColumn(min_value=0, max_value=100, format="%.1f"),
                     "DATE": st.column_config.DateColumn("DATE OF SALE",format="DD/MM/YYYY",),
-                    "CATEGORY": None,
-                },
+                    "ID": None
+                }
             )
             deleted_ids = set(dataframe_pending_entries['ID'].to_list()) - set(edited_df['ID'].to_list())
             
@@ -2581,22 +2583,94 @@ def render_investments():
     ,unsafe_allow_html=True)
 
     topcol1, topcol2, topcol3 = st.columns([0.8, 0.8, 3])
+    
+    
     # METRICS
     with topcol1:
         total_port_value = database.get_sum_investments()
         if isinstance(total_port_value, float):
-                st.metric("Total amount invested", f"{database.get_sum_investments():,.2f}€", border=True)
+                st.metric("Total amount invested", f"{database.get_sum_investments():,.2f}€", border=True, delta=utils.calculate_percentage_difference_for_investments(), format="percent", delta_description="vs. last month")
         else:
             st.toast(f"{total_port_value}", icon="⚠️", duration="infinite")
     st.divider()
+    with topcol2:
+        st.metric("Asset Count", f"{database.get_investments_count()}", border=True, height=135)
 
-    # Line chart για Portofolio Value
 
+    top_left_col, _,top_right_col = st.columns([3.2, 5, 1.5], vertical_alignment="bottom")
+    with top_left_col:
+    
+        with st.form("form", border=False):       
+            fc1, fc2 = st.columns(2)
+            with fc1:
+                search_query = st.text_input("Search entry", placeholder="Filter by description", label_visibility="collapsed")
+            with fc2:
+                submit_button = st.form_submit_button(":material/search:")
+                if submit_button and search_query.strip():
+                    render_search_query(search_query)       
+        
+                
+    with top_right_col:
+        btn_col1, btn_col2 = st.columns([0.6,1.8])
+        with btn_col1:     
+            dataframe_investments = utils.get_investments()
+            st.download_button(
+                ":material/download:",
+                dataframe_investments["ENTRY"].to_csv(index=False),
+                file_name="investments.csv",
+                mime="text/csv",
+                key="export_losses"
+            )
+        
+    with btn_col2:
+        if st.button(":material/arrow_insert: Add Investment", type="secondary"):
+            open_add_investment_entry_form()          
+
+    
+    tablec, uploadc = st.columns([6, 1.7])
+
+    with tablec:     
+                        
+        
+
+        # Πίνακας investments
+        dataframe_investments = utils.get_investments()
+        if dataframe_investments.empty:
+            st.write("There are no data.")
+        else:
+            edited_df = st.data_editor(
+                dataframe_investments, 
+                num_rows="delete",
+                height=428,
+                disabled=list(dataframe_investments.columns.values),
+                column_config={
+                                "DATE" : st.column_config.DateColumn("DATE",format="DD/MM/YYYY"),
+                                "ID" : None,
+                                "CATEGORY": st.column_config.MultiselectColumn(
+                                    disabled=True,
+                                    options=utils.get_categories(database.get_investments_categories),
+                                    color = ['#3B82F6', '#06B6D4', '#F43F5E', '#6366F1', '#8B5CF6', '#EC4899', '#475569'],                                
+                                ),
+                                "ACCOUNT": None
+                            }, 
+                hide_index=True,
+            )
+            deleted_ids = set(dataframe_investments['ID'].to_list()) - set(edited_df['ID'].to_list())
+            if deleted_ids:
+                for id in deleted_ids:
+                    database.delete_investment_entry(id)
+                st.rerun()     
+
+    with uploadc:
+        with st.container(border=True, height=428):
+            upload_container_for_individual_page()
+
+    # ----------    LINE CHART PORTOFOLIO VALUE    ----------
     with st.container(border=True):
         st.subheader("Portofolio Value")
         dataframe_investments_for_chart = utils.get_investments_line_chart()
 
-        
+            
         fig = go.Figure()
         fig.add_trace(
             go.Scatter(
@@ -2630,92 +2704,42 @@ def render_investments():
             )
         )
 
-        
+            
         fig.update_layout(
-            autosize=False,   
-            width=1500,        
-            height=475,       
-            title=dict(
-                text="<b>Investments Over Time</b>",
-                font=dict(size=18, color="#ffffff"),
-                x=0.02,
-            ),
-            paper_bgcolor="rgba(14, 17, 23, 0)",
-            plot_bgcolor="rgba(14, 17, 23, 0)",
-            hovermode="x unified",
-            xaxis=dict(
-                showgrid=True,
-                gridcolor="rgba(255, 255, 255, 0.07)",
-                color="#a0a0a0",
-                tickformat="%b %Y",
-            ),
-            yaxis=dict(
-                showgrid=True,
-                gridcolor="rgba(255, 255, 255, 0.07)",
-                color="#a0a0a0",
-                tickprefix="€",
-                zeroline=False,
-            ),
-            margin=dict(l=40, r=40, t=50, b=40), # Increased left/right margins to prevent clipping
-        )
+                autosize=False,   
+                width=1500,        
+                height=475,       
+                title=dict(
+                    text="<b>Investments Over Time</b>",
+                    font=dict(size=18, color="#ffffff"),
+                    x=0.02,
+                ),
+                paper_bgcolor="rgba(14, 17, 23, 0)",
+                plot_bgcolor="rgba(14, 17, 23, 0)",
+                hovermode="x unified",
+                xaxis=dict(
+                    showgrid=True,
+                    gridcolor="rgba(255, 255, 255, 0.07)",
+                    color="#a0a0a0",
+                    tickformat="%b %Y",
+                ),
+                yaxis=dict(
+                    showgrid=True,
+                    gridcolor="rgba(255, 255, 255, 0.07)",
+                    color="#a0a0a0",
+                    tickprefix="€",
+                    zeroline=False,
+                ),
+                margin=dict(l=40, r=40, t=50, b=40), # Increased left/right margins to prevent clipping
+            )
 
-        # Disable Streamlit's container width override
+            # Disable Streamlit's container width override
         st.plotly_chart(fig, use_container_width=False)    
             
     
          
          
-    search_col, btn_col1, btn_col2 = st.columns([7,1.2,0.8], vertical_alignment="bottom")
-    with search_col:
-        
-        with st.form("form", border=False):
-            
-            fc1, fc2 = st.columns(2)
-            with fc1:
-                search_query = st.text_input("Search entry", placeholder="Filter by description", label_visibility="collapsed")
-            with fc2:
-                submit_button = st.form_submit_button("search")
-        if submit_button and search_query.strip():
-            render_search_query(search_query)
-        
-    with btn_col1:     
-        if st.button("➕ Add Investment", type="secondary"):
-            open_add_investment_entry_form()
-    with btn_col2:
-        dataframe_investments = utils.get_investments()
-        st.download_button(
-            "⬇️ Export",
-            dataframe_investments["ENTRY"].to_csv(index=False),
-            file_name="investments.csv",
-            mime="text/csv",
-            key="export_losses"
-        )     
-                    
-    
-
-    # Πίνακας investments
-    dataframe_investments = utils.get_investments()
-    if dataframe_investments.empty:
-        st.write("There are no data.")
-    else:
-        edited_df = st.data_editor(
-            dataframe_investments, 
-            num_rows="delete",
-            height=650,
-            disabled=list(dataframe_investments.columns.values),
-            column_config={
-                            "DATE" : st.column_config.DateColumn("DATE",format="DD-MM-YYYY"),
-                            "ID" : None,
-                            "PLATFORM": None,
-                            "ACCOUNT": None
-                        }, 
-            hide_index=True,
-        )
-        deleted_ids = set(dataframe_investments['ID'].to_list()) - set(edited_df['ID'].to_list())
-        if deleted_ids:
-            for id in deleted_ids:
-                database.delete_investment_entry(id)
-            st.rerun()    
+      
     
 
 

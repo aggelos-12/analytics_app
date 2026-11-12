@@ -7,63 +7,65 @@ import pandas as pd
 
 # Αρχικοποίηση βάσης δεδομένων
 def initialize_database():
-    if not os.path.exists("database.db"):
-        connection = get_connection()
-        cursor = connection.cursor()
-        cursor.executescript("""
-            CREATE TABLE COSTS(
-                ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                DATE  DATE,
-                COST FLOAT,
-                DESCRIPTION TEXT,
-                CATEGORY TEXT,
-                NOTES TEXT
-            );
+   
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.executescript("""
+        CREATE TABLE COSTS(
+            ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            DATE  DATE,
+            COST FLOAT,
+            DESCRIPTION TEXT,
+            CATEGORY TEXT,
+            NOTES TEXT
+        );
             
-            CREATE TABLE EARNINGS(
-                ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                CATEGORY TEXT,
-                PROFIT FLOAT,
-                DESCRIPTION TEXT,
-                ROI INTEGER,
-                NOTES TEXT,
-                DATE  DATE
-            );
+        CREATE TABLE EARNINGS(
+            ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            CATEGORY TEXT,
+            PROFIT FLOAT,
+            DESCRIPTION TEXT,
+            ROI INTEGER,
+            NOTES TEXT,
+            DATE  DATE
+        );
 
-            CREATE TABLE INVESTMENTS(
-                ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                DATE  DATE,
-                ENTRY FLOAT,
-                DESCRIPTION TEXT,
-                AMOUNT INTEGER,
-                CURRENCY TINYTEXT,
-                PLATFORM TEXT
-            );
+        CREATE TABLE INVESTMENTS(
+            ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            CATEGORY TEXT,
+            DATE  DATE,
+            ENTRY FLOAT,
+            DESCRIPTION TEXT,
+            AMOUNT INTEGER,
+            CURRENCY TINYTEXT,
+            PLATFORM TEXT,
+            ACCOUNT TEXT
+        );
 
-            CREATE TABLE LOSSES(
-                ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                CATEGORY TEXT,
-                LOSS FLOAT,
-                DESCRIPTION TEXT,
-                DATE  DATE,
-                NOTES TEXT
-            );
+        CREATE TABLE LOSSES(
+            ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            CATEGORY TEXT,
+            LOSS FLOAT,
+            DESCRIPTION TEXT,
+            DATE  DATE,
+            NOTES TEXT
+        );
 
-            CREATE TABLE PENDING_EARNINGS(
-                ID INTEGER  PRIMARY KEY AUTOINCREMENT,
-                CATEGORY TEXT,
-                PROFIT FLOAT,
-                DESCRIPTION TEXT,
-                ROI INTEGER,
-                NOTES TEXT,
-                DATE DATE,
-                IMMEDIATE_TRANSFER BOOL
-            );
+        CREATE TABLE PENDING_EARNINGS(
+            ID INTEGER  PRIMARY KEY AUTOINCREMENT,
+            CATEGORY TEXT,
+            PROFIT FLOAT,
+            DESCRIPTION TEXT,
+            ROI INTEGER,
+            NOTES TEXT,
+            DATE DATE,
+            IMMEDIATE_TRANSFER BOOL
+        );
 
-        """)
+    """)
 
-        connection.commit()
-        connection.close()
+    connection.commit()
+    connection.close()
 
 
 # Θέτει την σύνδεση με την βάση
@@ -404,10 +406,6 @@ def get_total_net_profit_of_each_year():
 
 
 
-
-
-
-
 # Χρησιμοποιείτε για να κάνει convert το νόμισμα της επένδυσης
 # σε ευρώ (σε περίπτωση όπου δεν είναι ευρώ), έπειτα βρίσκει το
 # συνολικό ποσό επενδύσεων
@@ -492,6 +490,30 @@ def get_investments():
     connection.close()
     return entries
 
+# Επιστρέφει το συνολικό invested ποσο για τον τωρινό μήνα
+@st.cache_data(show_spinner=False)
+def get_investments_for_current_month(current_month, current_year):
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("""
+        SELECT SUM(ENTRY) FROM INVESTMENTS WHERE STRFTIME('%m' ,DATE) = ? AND STRFTIME('%Y', DATE) = ?""",
+        (f"{current_month}", f"{current_year}")
+    )
+    entries = cursor.fetchone()[0]
+    connection.close()
+    return entries
+
+# Επιστρέφει τον αριθμό τον κατηγοριών των επενδύσεων
+@st.cache_data(show_spinner=False)
+def get_investments_count():
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("""SELECT DISTINCT COUNT(CATEGORY) FROM INVESTMENTS""")
+    entries = cursor.fetchone()[0]
+    connection.close()
+    return entries
+
+
 # Επιστρέφει τον πίνακα INVESTMENTS μόνο με τις στήλες DATE, ENTRY, DESCRIPTION, CURRENCY
 @st.cache_data(show_spinner=False) 
 def get_investments_for_line_chart():
@@ -506,23 +528,6 @@ def get_investments_for_line_chart():
     connection.close()
     return entries
 
-# Επιστρέφει το συνολικο ποσό το οποίο
-# επενδύθηκε αυτό το μήνα
-#@st.cache_data(show_spinner=False)
-#def get_investments_amount_for_current_month():
-#    connection = get_connection()
-#    cursor = connection.cursor()
-#    cursor.execute("""
-#        SELECT SUM(ENTRY) FROM INVESTMENTS
-#        WHERE STRFTIME     
-#    """)
-#    data = cursor.fetchall()
-#    if not data:       
-#        connection.close()
-#        return [('EUR',)]
-#    else:
-#        connection.close()
-#        return data
 
 
 # Επιστρέφει τις πιο πρόσφατες συναλλάγες ανεξεραίτως κατηγορίας
@@ -638,6 +643,16 @@ def get_losses_categories():
     connection.close()
     return data
 
+# Επιστρέφει τα categories του πίνακα INVESTMENTS
+@st.cache_data(show_spinner=False)
+def get_investments_categories():
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("SELECT DISTINCT UPPER(CATEGORY) FROM INVESTMENTS")
+    data = cursor.fetchall()
+    connection.close()
+    return data
+
 
 # Επιστρέφει τα currencies από τον πίνακα INVESTMENTS
 @st.cache_data(show_spinner=False)
@@ -687,10 +702,10 @@ def add_pending_earning_entry(category, profit, description, roi, notes, date, i
     st.cache_data.clear()
 
 # Προσθέτει νεο entry στον πίνακα investments
-def add_investment_entry(date, entry, description, amount, currency, account, platform):
+def add_investment_entry(category, date, entry, description, amount, currency, platform, account):
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute('INSERT INTO INVESTMENTS (DATE, ENTRY, DESCRIPTION, AMOUNT, CURRENCY, ACCOUNT, PLATFORM) VALUES (?, ?, ?, ?, ?, ?, ?)', (date, entry, description, amount, currency, account, platform))
+    cursor.execute('INSERT INTO INVESTMENTS (CATEGORY, DATE, ENTRY, DESCRIPTION, AMOUNT, CURRENCY, PLATFORM, ACCOUNT) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', (category, date, entry, description, amount, currency, platform, account))
     connection.commit()
     connection.close()
     st.cache_data.clear()
@@ -791,12 +806,15 @@ def delete_all_losses_entry():
     st.cache_data.clear()
 
 
+
 if __name__ == "__main__":
-    print(get_earnings())
+    
+    
+    
     #print(get_losses())
     #data = merge_costs_and_losses()
     #data = pd.DataFrame(data)
-    #delete_all_investments_entry()
+    delete_all_investments_entry()
     #print(data)
     #df = pd.DataFrame(get_10_recent_transactions())
     #print(get_total_costs_year(2026))
