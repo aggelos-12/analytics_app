@@ -1248,10 +1248,14 @@ def render_search_query(search_query):
         # Check the unified session state
         if st.session_state.cost_loss_view == "Costs":
             dataframe_costs = utils.get_losses_or_costs("costs")
-            results = dataframe_costs[dataframe_costs["DESCRIPTION"].str.contains(search_query, case=False, na=False)]
+            results = dataframe_costs[dataframe_costs["DESCRIPTION"].str.contains(search_query, case=False, na=False)
+                                      | dataframe_costs["CATEGORY"].str.contains(search_query, case=False, na=False)
+            ]
         else:
             dataframe_losses = utils.get_losses_or_costs("losses")
-            results = dataframe_losses[dataframe_losses["DESCRIPTION"].str.contains(search_query, case=False, na=False)]
+            results = dataframe_losses[dataframe_losses["DESCRIPTION"].str.contains(search_query, case=False, na=False)
+                                       | dataframe_losses["CATEGORY"].str.contains(search_query, case=False, na=False)
+            ]
         edited_df = st.data_editor(
             results, 
             num_rows="delete",
@@ -1265,7 +1269,9 @@ def render_search_query(search_query):
     # search feature για την earnings σελίδα
     elif st.session_state.page == "Earnings":
         dataframe_earnings = utils.get_earnings()
-        results  = dataframe_earnings[dataframe_earnings["DESCRIPTION"].str.contains(search_query, case=False, na=False)]        
+        results  = dataframe_earnings[dataframe_earnings["DESCRIPTION"].str.contains(search_query, case=False, na=False)
+                                      | dataframe_earnings["CATEGORY"].str.contains(search_query, case=False, na=False)
+                                      ]        
         edited_df = st.data_editor(
             results, 
             num_rows="delete",
@@ -1278,7 +1284,12 @@ def render_search_query(search_query):
         )
     elif st.session_state.page == "Investments":
         dataframe_investments = utils.get_investments()
-        results  = dataframe_investments[dataframe_investments["DESCRIPTION"].str.contains(search_query, case=False, na=False)]        
+        results = dataframe_investments[
+            dataframe_investments["DESCRIPTION"].str.contains(search_query, case=False, na=False, regex=False)
+            | dataframe_investments["CATEGORY"].str.contains(search_query, case=False, na=False, regex=False)
+            | dataframe_investments["ACCOUNT"].str.contains(search_query, case=False, na=False, regex=False)
+            | dataframe_investments["PLATFORM"].str.contains(search_query, case=False, na=False, regex=False)
+        ]
         edited_df = st.data_editor(
             results, 
             num_rows="delete",
@@ -1541,7 +1552,7 @@ def render_costs_losses():
                     ,unsafe_allow_html=True)
                 fc1, fc2 = st.columns(2)
                 with fc1:
-                    search_query = st.text_input("Search entry", placeholder="Filter by description", label_visibility="collapsed")
+                    search_query = st.text_input("Search entry", placeholder="Search", label_visibility="collapsed")
                 with fc2:
                     submit_button = st.form_submit_button(":material/search:")
             if submit_button and search_query.strip():
@@ -2018,7 +2029,7 @@ def render_earnings():
                 
             fc1, fc2 = st.columns(2)
             with fc1:
-                search_query = st.text_input("Search entry", placeholder="Filter by description", label_visibility="collapsed")
+                search_query = st.text_input("Search entry", placeholder="Search", label_visibility="collapsed")
             with fc2:
                 submit_button = st.form_submit_button(":material/search:")
             if submit_button and search_query.strip():
@@ -2603,7 +2614,7 @@ def render_investments():
         with st.form("form", border=False):       
             fc1, fc2 = st.columns(2)
             with fc1:
-                search_query = st.text_input("Search entry", placeholder="Filter by description", label_visibility="collapsed")
+                search_query = st.text_input("Search entry", placeholder="Search", label_visibility="collapsed")
             with fc2:
                 submit_button = st.form_submit_button(":material/search:")
                 if submit_button and search_query.strip():

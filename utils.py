@@ -367,5 +367,7 @@ def delete_all():
 
 
 if __name__=='__main__':
-    print(get_categories(database.get_investments_categories))
+    A = get_investments()
+    A = A['CATEGORY']
+    print(A)
     
