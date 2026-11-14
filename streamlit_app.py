@@ -870,9 +870,6 @@ def render_dashboard():
     
     today = datetime.today()
      
-              
-
-      
     # Δημιουργεί 5 στήλες (σαν containers) στα οποία χωρίζεται η οθόνη
     c1, c2, c3, c4 = st.columns(4)
     # Customize τα metrics τα οποία εμφανίζονται στο dashboard
@@ -1241,7 +1238,7 @@ def render_dashboard():
 # =================== search function ===================
 
 
-@st.dialog("search query", width="large")
+@st.dialog("Search Results", width="large")
 def render_search_query(search_query):
     # search feature για την costs&losses σελίδα
     if st.session_state.page == "Costs&Losses":
@@ -1251,19 +1248,21 @@ def render_search_query(search_query):
             results = dataframe_costs[dataframe_costs["DESCRIPTION"].str.contains(search_query, case=False, na=False)
                                       | dataframe_costs["CATEGORY"].str.contains(search_query, case=False, na=False)
             ]
+            amount_type = "COST"
         else:
             dataframe_losses = utils.get_losses_or_costs("losses")
             results = dataframe_losses[dataframe_losses["DESCRIPTION"].str.contains(search_query, case=False, na=False)
                                        | dataframe_losses["CATEGORY"].str.contains(search_query, case=False, na=False)
             ]
+            amount_type = "LOSS"
         edited_df = st.data_editor(
             results, 
             num_rows="delete",
             column_config={
-                            "DATE" : st.column_config.DateColumn(format="DD-MM-YYYY"),
+                            "DATE" : st.column_config.DateColumn(format="DD/MM/YYYY"),
                             "ID": None
                         }, 
-            hide_index=True,
+            hide_index=True,column_order=["DATE", "DESCRIPTION", amount_type, "CATEGORY", "NOTES"]
         
         )
     # search feature για την earnings σελίδα
@@ -1276,8 +1275,9 @@ def render_search_query(search_query):
             results, 
             num_rows="delete",
             column_config={
-                            "DATE" : st.column_config.DateColumn(format="DD-MM-YYYY"),
-                            "ID": None
+                            "DATE" : st.column_config.DateColumn(format="DD/MM/YYYY"),
+                            "ID": st.column_config.NumberColumn(default=None, alignment="left"),
+                            "ROI": st.column_config.ProgressColumn(min_value=0,max_value=100,format="%.1f%%")
                         }, 
             hide_index=True, column_order=['DATE', 'CATEGORY', 'PROFIT', 'DESCRIPTION', 'ROI', 'NOTES']
         
@@ -1294,14 +1294,25 @@ def render_search_query(search_query):
             results, 
             num_rows="delete",
             column_config={
-                            "DATE" : st.column_config.DateColumn("Date",format="DD-MM-YYYY"),
-                            "ID": None
-                        }, 
+                "DATE" : st.column_config.DateColumn("DATE",format="DD/MM/YYYY"),
+                "ID" : None,
+                "CATEGORY": st.column_config.MultiselectColumn(
+                    disabled=True,
+                    options=utils.get_categories(database.get_investments_categories),
+                    color = ['#3B82F6', '#06B6D4', '#F43F5E', '#6366F1', '#8B5CF6', '#EC4899', '#475569'],                                
+                ),
+                "ACTIVE": st.column_config.CheckboxColumn()
+            },  
             hide_index=True,
         
         )
-
-
+        # Χρησιμοποιείτε έτσι ώστε να αλλάζει η τιμή της ACTIVE στο database
+        df_w_active_value_change = edited_df.loc[dataframe_investments['ACTIVE'] != edited_df['ACTIVE']]
+            
+        if not df_w_active_value_change.empty:
+            for index, row in df_w_active_value_change.iterrows():
+               database.update_investment_entry_ACTIVE(row["ID"], row["ACTIVE"])
+            
 
 
 
@@ -2551,10 +2562,14 @@ def render_earnings():
 @st.dialog("Add investment")
 def open_add_investment_entry_form():
     with st.form("add investment"):
-        date = st.date_input("Date", value=datetime.today())   
+        date = st.date_input("Date", value=datetime.today())
+        category = st.selectbox(
+            label = "Select Platform", options=utils.get_categories(database.get_investments_categories),index=0,
+            accept_new_options = True, help="Select/Add Category"
+        )   
         entry = st.number_input("Amount (€)", min_value=0.0)
         description = st.text_input("Description", )
-        amount = st.number_input("Amount", min_value=0.0)
+        quantity = st.number_input("Quantity", min_value=0.0)
         currency = st.selectbox(
             label = "Select Currency", options=utils.get_categories(database.get_investments_currencies), 
             index=0, 
@@ -2564,9 +2579,12 @@ def open_add_investment_entry_form():
         # Μετατρέπω το currency σε κεφαλαία
         currency = currency.upper()
 
-        account = st.text_input("Account", type="email")
-        platform = st.text_input("Platform", placeholder="brokerage platform")
-         
+        account = st.text_input("Account", value="account@mail.com")
+        platform = st.selectbox(
+            label = "Select Platform", options=utils.get_categories(database.get_investments_platforms),index=0,
+            accept_new_options = True, help="Select/Add Category"
+        )
+        
         submit = st.form_submit_button("Add")
             
         if submit:
@@ -2593,7 +2611,7 @@ def render_investments():
     """
     ,unsafe_allow_html=True)
 
-    topcol1, topcol2, topcol3 = st.columns([0.8, 0.8, 3])
+    topcol1, topcol2, topcol3, topcol4 = st.columns(4)
     
     
     # METRICS
@@ -2603,11 +2621,35 @@ def render_investments():
                 st.metric("Total amount invested", f"{database.get_sum_investments():,.2f}€", border=True, delta=utils.calculate_percentage_difference_for_investments(), format="percent", delta_description="vs. last month")
         else:
             st.toast(f"{total_port_value}", icon="⚠️", duration="infinite")
-    st.divider()
+    
     with topcol2:
-        st.metric("Asset Count", f"{database.get_investments_count()}", border=True, height=135)
+        result = database.get_investments_count()
+        if result == 0:
+            result = "-"
+        st.metric("Asset Count", f"{result}", border=True, delta="Total Divesrified Assets", delta_color="off", delta_arrow="off")
+    with topcol3:
+        active_investments = database.get_investments_active_status()
+        if active_investments[0] == 0:
+            result = "-"
+            result_2 = 0
+        else:
+            result = active_investments[0]
+            result_2 = database.get_investments_platforms_w_active()[0]
+        
+            
+        st.metric("Active Investments", f"{result}", border=True, delta=f"Across {result_2} Platforms", delta_color="off", delta_arrow="off")
+    with topcol4:
+        most_exposed_platform = utils.get_platform_w_biggest_exposure()
+        if isinstance(most_exposed_platform, str):
+            st.toast(f"{most_exposed_platform}", icon="⚠️", duration="infinite")
+        elif isinstance(most_exposed_platform, list):
+            st.metric("Primary Platform Exposure", f"{most_exposed_platform[1]}", border=True, delta=most_exposed_platform[0], delta_color="blue", delta_arrow="off", format="percent")  
+        else:
+            st.metric("Primary Platform Exposure", "-", border=True, delta="0", delta_color="blue", delta_arrow="off", format="percent")
 
-
+    
+    st.divider()
+    
     top_left_col, _,top_right_col = st.columns([3.2, 5, 1.5], vertical_alignment="bottom")
     with top_left_col:
     
@@ -2625,9 +2667,10 @@ def render_investments():
         btn_col1, btn_col2 = st.columns([0.6,1.8])
         with btn_col1:     
             dataframe_investments = utils.get_investments()
+            dataframe_investments = dataframe_investments.drop(columns=["ID"])
             st.download_button(
                 ":material/download:",
-                dataframe_investments["ENTRY"].to_csv(index=False),
+                dataframe_investments.to_csv(index=False),
                 file_name="investments.csv",
                 mime="text/csv",
                 key="export_losses"
@@ -2653,7 +2696,7 @@ def render_investments():
                 dataframe_investments, 
                 num_rows="delete",
                 height=428,
-                disabled=list(dataframe_investments.columns.values),
+                disabled=['ID', 'CATEGORY', 'DATE', 'ENTRY', 'DESCRIPTION', 'AMOUNT', 'CURRENCY', 'PLATFORM', 'ACCOUNT'],
                 column_config={
                                 "DATE" : st.column_config.DateColumn("DATE",format="DD/MM/YYYY"),
                                 "ID" : None,
@@ -2662,15 +2705,26 @@ def render_investments():
                                     options=utils.get_categories(database.get_investments_categories),
                                     color = ['#3B82F6', '#06B6D4', '#F43F5E', '#6366F1', '#8B5CF6', '#EC4899', '#475569'],                                
                                 ),
-                                "ACCOUNT": None
+                                "ACCOUNT": None,
+                                "ACTIVE": st.column_config.CheckboxColumn()
                             }, 
-                hide_index=True,
+                hide_index=True
             )
             deleted_ids = set(dataframe_investments['ID'].to_list()) - set(edited_df['ID'].to_list())
             if deleted_ids:
                 for id in deleted_ids:
                     database.delete_investment_entry(id)
-                st.rerun()     
+                st.rerun()
+                
+
+            # Χρησιμοποιείτε έτσι ώστε να αλλάζει η τιμή της ACTIVE στο database
+            df_w_active_value_change = edited_df.loc[dataframe_investments['ACTIVE'] != edited_df['ACTIVE']]
+                        
+            if not df_w_active_value_change.empty:
+                for index, row in df_w_active_value_change.iterrows():
+                    database.update_investment_entry_ACTIVE(row["ID"], row["ACTIVE"])
+                
+                st.rerun()
 
     with uploadc:
         with st.container(border=True, height=428):

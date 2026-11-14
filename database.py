@@ -39,7 +39,8 @@ def initialize_database():
             AMOUNT INTEGER,
             CURRENCY TINYTEXT,
             PLATFORM TEXT,
-            ACCOUNT TEXT
+            ACCOUNT TEXT,
+            ACTIVE BOOL
         );
 
         CREATE TABLE LOSSES(
@@ -404,13 +405,10 @@ def get_total_net_profit_of_each_year():
     return data
 
 
-
-
 # Χρησιμοποιείτε για να κάνει convert το νόμισμα της επένδυσης
-# σε ευρώ (σε περίπτωση όπου δεν είναι ευρώ), έπειτα βρίσκει το
-# συνολικό ποσό επενδύσεων
-@st.cache_data(show_spinner=False) 
-def get_sum_investments():
+# σε ευρώ (σε περίπτωση όπου δεν είναι ευρώ)
+@st.cache_data(ttl=3600, show_spinner=False)
+def get_currency_rates_conversion():
     try:
         current_date = datetime.today()
         # API request
@@ -423,35 +421,14 @@ def get_sum_investments():
         # π.χ. δεδομένα server "'{"amount": 1.0, "base": "USD", "rates": {"EUR": 0.92}}'"
         data = response.json()
         rates = data['rates']
+        
         # USD TO EUR exhcange rate
-        
-        # GBP TO EUR exhcange rate
         usd_to_eur = 1 / rates["USD"]
+        # GBP TO EUR exhcange rate
         gbp_to_eur = 1 / rates["GBP"]
-
-        connection = get_connection()
-        cursor = connection.cursor()
-        query = """
-            SELECT COALESCE(SUM(
-                                CASE CURRENCY
-                                    WHEN 'USD' THEN ENTRY * ?
-                                    WHEN 'GBP' THEN ENTRY * ?
-                                    WHEN 'EUR' THEN ENTRY
-                                    ELSE 0.0 END
-                                )   
-                        
-            , 0.0)
-            FROM INVESTMENTS
-            
-        """
-        cursor.execute(query, (usd_to_eur, gbp_to_eur,))
-        result = cursor.fetchone()[0]
-        connection.close()
-        if  result == 0.0:
-            return 'There are no records to sum'
-        else:
-            return result
-        
+        rates = [usd_to_eur, gbp_to_eur]
+        return rates
+    
     # Αν για τον οπιαδήποτε λόγο δεν λειτουργει το API θα εμφανιστεί το response.text
     # error code (π.χ. 404, 500, 429)    
     except requests.exceptions.HTTPError as error:
@@ -459,6 +436,36 @@ def get_sum_investments():
     # Σε περίπτωση που κοπεί το internet, πέσει DNS ή γίνει timeout
     except requests.exceptions.RequestException as error:
         return f"Network error {error}"
+
+ 
+# Επιστρέφει το συνολικό ποσό επενδύσεων, για όσες είναι ACTIVE
+@st.cache_data(show_spinner=False) 
+def get_sum_investments():
+    conversions = get_currency_rates_conversion()
+    if isinstance(conversions, list):
+        connection = get_connection()
+        cursor = connection.cursor()
+        
+        query = """
+                SELECT COALESCE(SUM(
+                                    CASE CURRENCY
+                                        WHEN 'USD' THEN ENTRY * ?
+                                        WHEN 'GBP' THEN ENTRY * ?
+                                        WHEN 'EUR' THEN ENTRY
+                                        ELSE 0.0 END
+                                    )   
+                            
+                , 0.0)
+                FROM INVESTMENTS
+                WHERE ACTIVE = 1
+            """
+        cursor.execute(query, (conversions[0], conversions[1],))
+        result = cursor.fetchone()[0]
+        connection.close()
+        return result
+    else:  
+        return "error from conversion rates, list is empty." 
+    
 
 # Επιστρέφει τα κόστη και τις ζημιές ανά κατηγορία
 # (summed για κάθε κατηγορία)
@@ -493,25 +500,91 @@ def get_investments():
 # Επιστρέφει το συνολικό invested ποσο για τον τωρινό μήνα
 @st.cache_data(show_spinner=False)
 def get_investments_for_current_month(current_month, current_year):
-    connection = get_connection()
-    cursor = connection.cursor()
-    cursor.execute("""
-        SELECT SUM(ENTRY) FROM INVESTMENTS WHERE STRFTIME('%m' ,DATE) = ? AND STRFTIME('%Y', DATE) = ?""",
-        (f"{current_month}", f"{current_year}")
-    )
-    entries = cursor.fetchone()[0]
-    connection.close()
-    return entries
+    conversions = get_currency_rates_conversion()
+    if isinstance(conversions, list):
+        connection = get_connection()
+        cursor = connection.cursor()
+        cursor.execute("""
+            SELECT COALESCE(SUM(    
+                                    CASE CURRENCY
+                                    WHEN 'USD' THEN ENTRY * ?
+                                    WHEN 'GBP' THEN ENTRY * ?
+                                    WHEN 'EUR' THEN ENTRY
+                                    ELSE 0.0 END
+                                ), 0.0)
+            FROM INVESTMENTS 
+            WHERE STRFTIME('%m', DATE) = ? AND STRFTIME('%Y', DATE) = ?  AND ACTIVE = 1""",
+            (conversions[0], conversions[1], f"{current_month}", f"{current_year}")
+        )
+        entries = cursor.fetchone()[0]
+        connection.close()
+        return entries
+    else:
+       return "error from conversion rates, list is empty." 
 
 # Επιστρέφει τον αριθμό τον κατηγοριών των επενδύσεων
 @st.cache_data(show_spinner=False)
 def get_investments_count():
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute("""SELECT DISTINCT COUNT(CATEGORY) FROM INVESTMENTS""")
+    cursor.execute("""SELECT DISTINCT COUNT(DESCRIPTION) FROM INVESTMENTS WHERE ACTIVE = 1""")
     entries = cursor.fetchone()[0]
     connection.close()
     return entries
+
+# Επιστρέφει τον αριθμό τον κατηγοριών των επενδύσεων
+@st.cache_data(show_spinner=False)
+def get_investments_active_status():
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("""SELECT COUNT(DISTINCT(DESCRIPTION)) FROM INVESTMENTS WHERE ACTIVE = 1""")
+    entries = cursor.fetchone()
+    connection.close()
+    return entries
+
+# Επιστρέφει τον αριθμό τον κατηγοριών των επενδύσεων
+@st.cache_data(show_spinner=False)
+def get_investments_platforms_w_active():
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("""SELECT COUNT(DISTINCT(PLATFORM)) FROM INVESTMENTS WHERE ACTIVE = 1""")
+    entries = cursor.fetchone()
+    connection.close()
+    return entries
+
+# Επιστρέφει την πλατφόρμα η οποία έχει το μεγαλύτερο συνολικά
+# επενδυμένο ποσό
+@st.cache_data(show_spinner=False)
+def get_most_exposed_platform():
+    conversions = get_currency_rates_conversion()
+    if isinstance(conversions, list):
+        connection = get_connection()
+        cursor = connection.cursor()
+        cursor.execute("""
+            WITH CONVERTED_TABLE AS (
+                SELECT COALESCE( 
+                        CASE CURRENCY
+                            WHEN 'USD' THEN ENTRY * ?
+                            WHEN 'GBP' THEN ENTRY * ?
+                            WHEN 'EUR' THEN ENTRY
+                            ELSE 0.0 END
+                        , 0.0) AS ENTRY, PLATFORM
+                FROM INVESTMENTS
+                WHERE ACTIVE = 1
+            )
+            SELECT SUM(ENTRY) AS MAX_ENTRY, PLATFORM
+            FROM CONVERTED_TABLE
+            GROUP BY PLATFORM
+            HAVING MAX_ENTRY = (SELECT MAX(SUM_ENTRY) FROM (
+                                SELECT SUM(ENTRY) AS SUM_ENTRY FROM CONVERTED_TABLE
+                                GROUP BY PLATFORM
+            ))ORDER BY PLATFORM ASC
+        """, (conversions[0], conversions[1],))
+        entries = cursor.fetchall() 
+        connection.close()
+        return entries
+    else:
+        return "error from conversion rates, list is empty." 
 
 
 # Επιστρέφει τον πίνακα INVESTMENTS μόνο με τις στήλες DATE, ENTRY, DESCRIPTION, CURRENCY
@@ -653,6 +726,16 @@ def get_investments_categories():
     connection.close()
     return data
 
+# Επιστρέφει τα platforms του πίνακα INVESTMENTS
+@st.cache_data(show_spinner=False)
+def get_investments_platforms():
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("SELECT DISTINCT UPPER(PLATFORM) FROM INVESTMENTS")
+    data = cursor.fetchall()
+    connection.close()
+    return data
+
 
 # Επιστρέφει τα currencies από τον πίνακα INVESTMENTS
 @st.cache_data(show_spinner=False)
@@ -669,7 +752,20 @@ def get_investments_currencies():
         return data
 
 
-
+# Προσθέτει νεο entry στον πίνακα cost
+def update_investment_entry_ACTIVE(ID, ACTIVE_VALUE):
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("""
+        UPDATE INVESTMENTS
+        SET ACTIVE = ?
+        WHERE ID = ?
+    """, (F"{ACTIVE_VALUE}", f"{ID}"))
+    connection.commit()
+    connection.close()
+    st.cache_data.clear() # καθαρίζει το cache ετσι ώστε να τρέχει η εφαρμογή τις
+                          # μεθόδους αντί να πέρνει την αποθηκευμένει cache τιμή
+                          # event base caching
 
 # Προσθέτει νεο entry στον πίνακα cost
 def add_cost_entry(date, cost, description, category, notes):
@@ -702,10 +798,10 @@ def add_pending_earning_entry(category, profit, description, roi, notes, date, i
     st.cache_data.clear()
 
 # Προσθέτει νεο entry στον πίνακα investments
-def add_investment_entry(category, date, entry, description, amount, currency, platform, account):
+def add_investment_entry(category, date, entry, description, amount, currency, platform, account, active):
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute('INSERT INTO INVESTMENTS (CATEGORY, DATE, ENTRY, DESCRIPTION, AMOUNT, CURRENCY, PLATFORM, ACCOUNT) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', (category, date, entry, description, amount, currency, platform, account))
+    cursor.execute('INSERT INTO INVESTMENTS (CATEGORY, DATE, ENTRY, DESCRIPTION, AMOUNT, CURRENCY, PLATFORM, ACCOUNT, ACTIVE) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', (category, date, entry, description, amount, currency, platform, account, active))
     connection.commit()
     connection.close()
     st.cache_data.clear()
@@ -814,7 +910,8 @@ if __name__ == "__main__":
     #print(get_losses())
     #data = merge_costs_and_losses()
     #data = pd.DataFrame(data)
-    delete_all_investments_entry()
+    
+    print(get_investments_platforms_w_active())
     #print(data)
     #df = pd.DataFrame(get_10_recent_transactions())
     #print(get_total_costs_year(2026))

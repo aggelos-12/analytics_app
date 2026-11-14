@@ -9,7 +9,7 @@ def add_to_database(dataframe):
     table_schema = { 
         "costs": ["DATE", "COST", "DESCRIPTION", "CATEGORY", "NOTES"],
         "earnings": ["CATEGORY", "PROFIT", "DESCRIPTION", "ROI", "NOTES", "DATE"],
-        "investments": ["CATEGORY", "DATE", "ENTRY", "DESCRIPTION", "AMOUNT", "CURRENCY", "PLATFORM", "ACCOUNT"],
+        "investments": ["CATEGORY", "DATE", "ENTRY", "DESCRIPTION", "AMOUNT", "CURRENCY", "PLATFORM", "ACCOUNT", "ACTIVE"],
         "losses": ["CATEGORY", "LOSS", "DESCRIPTION", "DATE", "NOTES"],
         "pearnings": ["CATEGORY", "PROFIT", "DESCRIPTION", "ROI", "NOTES", "DATE", "IMMEDIATE_TRANSFER"]
     }
@@ -29,7 +29,8 @@ def add_to_database(dataframe):
         "ACCOUNT": "str",
         "PLATFORM": "str",
         "LOSS": "numeric",
-        "IMMEDIATE_TRANSFER": "bool"
+        "IMMEDIATE_TRANSFER": "bool",
+        "ACTIVE": "bool"
     }
 
     # Αποθηκεύω τα ονόματα των στηλών του dataframe
@@ -73,7 +74,7 @@ def add_to_database(dataframe):
                 # και με την any() έλεγχω αν υπάρχει τουλάχιστον μια τέτοια τιμή
 
             if table == "costs":
-                print(table)
+                
                 for row in dataframe.itertuples(index=False):
                     database.add_cost_entry(row[0], row[1], row[2], row[3], row[4])
             elif table == "earnings":
@@ -81,7 +82,7 @@ def add_to_database(dataframe):
                     database.add_earning_entry(row[0], row[1], row[2], row[3], row[4], row[5])
             elif table == "investments":
                 for row in dataframe.itertuples(index=False): 
-                    database.add_investment_entry(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])
+                    database.add_investment_entry(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8])
             elif table == "losses":
                 for row in dataframe.itertuples(index=False): 
                     database.add_loss_entry(row[0], row[1], row[2], row[3], row[4])

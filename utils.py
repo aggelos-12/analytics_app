@@ -108,9 +108,13 @@ def calculate_percentage_difference_for_investments():
     # Δεν πολλαπλασίαζω με το 100 διότι το κάνει αυτόματα η st.metric 
     current_value = database.get_investments_for_current_month(today.strftime("%m"), today.year)
     past_value = database.get_investments_for_current_month(last_month, last_months_year)
-    print(current_value)
-    print(past_value)
+    
+    if current_value == None or past_value == None:
+        return None
     if past_value == 0:
+        return None
+    # Error from conversion rates
+    if isinstance(current_value, str) or isinstance(past_value, str):
         return None
     percentage_diff = ((current_value - past_value) / abs(past_value))
     return percentage_diff
@@ -166,7 +170,7 @@ def get_losses_or_costs(choice):
 def get_investments():
     #current_date = datetime.today()
     data_investments = database.get_investments()
-    data_investments = pd.DataFrame(data_investments, columns=['ID', 'CATEGORY', 'DATE', 'ENTRY', 'DESCRIPTION', 'AMOUNT', 'CURRENCY', 'PLATFORM', 'ACCOUNT'])
+    data_investments = pd.DataFrame(data_investments, columns=['ID', 'CATEGORY', 'DATE', 'ENTRY', 'DESCRIPTION', 'AMOUNT', 'CURRENCY', 'PLATFORM', 'ACCOUNT', 'ACTIVE'])
     data_investments['DATE'] = pd.to_datetime(data_investments['DATE'], format='mixed')
     #Σε περίπτωση όπου ο πίνακας είναι άδειος, διαγράφεται η στήλη ID
     if data_investments.empty:
@@ -174,7 +178,7 @@ def get_investments():
     
     # φιλτράρω τα δεδομένα έτσι ώστε να επιστρέφονται μόνο οι επενδύσεις οι οποίες είναι
     # ακόμα ενεργές βάση ημερομηνίας
-    #data_investments = data_investments[data_investments["DATE"] > current_date]
+    
     data_investments = data_investments.sort_values(by='DATE')
     return data_investments
 
@@ -208,6 +212,23 @@ def get_categories(func):
     data_categories = [element[0] for element in data_categories]
     return data_categories
 
+def get_platform_w_biggest_exposure():
+    data = database.get_most_exposed_platform()
+    # Error από τα conversion rates
+    if isinstance(data, str):
+        return data
+    if len(data) == 0:
+        return None
+    
+    df = pd.DataFrame(data, columns=["TOTAL", "PLATFORM"])
+    rows, columns = df.shape
+    if rows >= 1:
+        total_sum_of_investments = database.get_sum_investments()
+        platforms_part = df["TOTAL"][0]
+        result = [platforms_part/total_sum_of_investments, df["PLATFORM"][0]]
+        return result
+    
+        
 
 # Συγχέει τα κόστη και τις ζημιές ανα κατηγορία σε ενα dataframe
 # και βρίσκει το συνολίκο ποσό ανα κατηγορία
@@ -274,7 +295,8 @@ def add_template_row(dataframe,table):
             "AMOUNT": 0,
             "CURRENCY": "EUR",
             "PLATFORM": "your platform",
-            "ACCOUNT": "your account"
+            "ACCOUNT": "your account",
+            "ACTIVE": 1
         })
     elif table == "pearnings":
         template_row = pd.Series({ 
@@ -367,7 +389,5 @@ def delete_all():
 
 
 if __name__=='__main__':
-    A = get_investments()
-    A = A['CATEGORY']
-    print(A)
+    print(get_platform_w_biggest_exposure())
     
