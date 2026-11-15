@@ -36,7 +36,7 @@ def initialize_database():
             DATE  DATE,
             ENTRY FLOAT,
             DESCRIPTION TEXT,
-            AMOUNT INTEGER,
+            QUANTITY INTEGER,
             CURRENCY TINYTEXT,
             PLATFORM TEXT,
             ACCOUNT TEXT,
@@ -587,19 +587,35 @@ def get_most_exposed_platform():
         return "error from conversion rates, list is empty." 
 
 
-# Επιστρέφει τον πίνακα INVESTMENTS μόνο με τις στήλες DATE, ENTRY, DESCRIPTION, CURRENCY
+# Επιστρέφει τον πίνακα INVESTMENTS μόνο με τις στήλες DATE, ENTRY, DESCRIPTION, PLATFORM
+# (εχεί γίνει conversion προηγουμενώς)
 @st.cache_data(show_spinner=False) 
 def get_investments_for_line_chart():
-    connection = get_connection()
-    cursor = connection.cursor()
-    cursor.execute("""
-    SELECT DATE, ENTRY, DESCRIPTION, CURRENCY 
-        FROM INVESTMENTS 
-        ORDER BY DATE ASC"""
-    )
-    entries = cursor.fetchall()
-    connection.close()
-    return entries
+    conversions = get_currency_rates_conversion()
+    if isinstance(conversions, list):
+        connection = get_connection()
+        cursor = connection.cursor()
+        cursor.execute("""
+        WITH CONVERTED_TABLE AS (
+            SELECT DATE, COALESCE( 
+                    CASE CURRENCY
+                        WHEN 'USD' THEN ENTRY * ?
+                        WHEN 'GBP' THEN ENTRY * ?
+                        WHEN 'EUR' THEN ENTRY
+                        ELSE 0.0 END
+                    , 0.0) AS ENTRY, DESCRIPTION, PLATFORM, QUANTITY
+            FROM INVESTMENTS
+            WHERE ACTIVE = 1
+        )
+        SELECT DATE, ENTRY, DESCRIPTION, PLATFORM, QUANTITY
+            FROM CONVERTED_TABLE 
+            ORDER BY DATE ASC"""
+        , (conversions[0], conversions[1],))
+        entries = cursor.fetchall()
+        connection.close()
+        return entries
+    else:
+        return "error from conversion rates, list is empty."
 
 
 
@@ -798,10 +814,10 @@ def add_pending_earning_entry(category, profit, description, roi, notes, date, i
     st.cache_data.clear()
 
 # Προσθέτει νεο entry στον πίνακα investments
-def add_investment_entry(category, date, entry, description, amount, currency, platform, account, active):
+def add_investment_entry(category, date, entry, description, quantity, currency, platform, account, active):
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute('INSERT INTO INVESTMENTS (CATEGORY, DATE, ENTRY, DESCRIPTION, AMOUNT, CURRENCY, PLATFORM, ACCOUNT, ACTIVE) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', (category, date, entry, description, amount, currency, platform, account, active))
+    cursor.execute('INSERT INTO INVESTMENTS (CATEGORY, DATE, ENTRY, DESCRIPTION, QUANTITY, CURRENCY, PLATFORM, ACCOUNT, ACTIVE) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', (category, date, entry, description, quantity, currency, platform, account, active))
     connection.commit()
     connection.close()
     st.cache_data.clear()
@@ -910,8 +926,8 @@ if __name__ == "__main__":
     #print(get_losses())
     #data = merge_costs_and_losses()
     #data = pd.DataFrame(data)
-    
-    print(get_investments_platforms_w_active())
+    df = pd.DataFrame(get_investments_for_line_chart())
+    print(df)
     #print(data)
     #df = pd.DataFrame(get_10_recent_transactions())
     #print(get_total_costs_year(2026))

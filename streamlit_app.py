@@ -403,87 +403,26 @@ with st.sidebar:
 
   # Logo
     st.markdown("""
-        <div class="logo-container">
-            <div class="logo-icon-box">
-                <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    viewBox="0 0 100 100" 
-                    width="64" 
-                    height="64"
-                >
-                    <defs>
-                        <!-- Background Delta Gradients -->
-                        <linearGradient id="dLeft" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#10B981"/>
-                        <stop offset="100%" stop-color="#047857"/>
-                        </linearGradient>
-                        <linearGradient id="dRight" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stop-color="#047857"/>
-                        <stop offset="100%" stop-color="#022C22"/>
-                        </linearGradient>
-                        <linearGradient id="dBotLeft" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stop-color="#34D399"/>
-                        <stop offset="100%" stop-color="#059669"/>
-                        </linearGradient>
-                        <linearGradient id="dBotRight" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stop-color="#059669"/>
-                        <stop offset="100%" stop-color="#064E3B"/>
-                        </linearGradient>
-                        <!-- Overlay Arrow Gradients -->
-                        <linearGradient id="aLeftTop" x1="0%" y1="100%" x2="100%" y2="0%">
-                        <stop offset="0%" stop-color="#6EE7B7"/>
-                        <stop offset="100%" stop-color="#10B981"/>
-                        </linearGradient>
-                        <linearGradient id="aLeftBot" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#10B981"/>
-                        <stop offset="100%" stop-color="#047857"/>
-                        </linearGradient>
-                        <linearGradient id="aRightTop" x1="0%" y1="100%" x2="100%" y2="0%">
-                        <stop offset="0%" stop-color="#A7F3D0"/>
-                        <stop offset="100%" stop-color="#34D399"/>
-                        </linearGradient>
-                        <linearGradient id="aRightBot" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#10B981"/>
-                        <stop offset="100%" stop-color="#047857"/>
-                        </linearGradient>
-                        <linearGradient id="aHeadTop" x1="0%" y1="100%" x2="100%" y2="0%">
-                        <stop offset="0%" stop-color="#A7F3D0"/>
-                        <stop offset="100%" stop-color="#6EE7B7"/>
-                        </linearGradient>
-                        <linearGradient id="aHeadBot" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#34D399"/>
-                        <stop offset="100%" stop-color="#059669"/>
-                        </linearGradient>
-                    </defs>
-                    <!-- Background Delta / A-Frame -->
-                    <g id="Delta-Frame">
-                        <!-- Left Leg -->
-                        <polygon points="47.5,15 12.5,85 32.5,75 47.5,45" fill="url(#dLeft)" />
-                        <!-- Right Leg -->
-                        <polygon points="47.5,15 47.5,45 62.5,75 87.5,85" fill="url(#dRight)" />
-                        <!-- Bottom Left Base -->
-                        <polygon points="12.5,85 47.5,85 47.5,75 32.5,75" fill="url(#dBotLeft)" />
-                        <!-- Bottom Right Base -->
-                        <polygon points="47.5,85 87.5,85 62.5,75 47.5,75" fill="url(#dBotRight)" />
-                    </g>
-                    <!-- Overlay Arrow (92% opacity for the translucent glass bleed effect) -->
-                    <g id="Growth-Arrow" opacity="0.92">
-                        <!-- Left Shaft Top Facet -->
-                        <polygon points="27.5,50 47.5,65 47.5,75 22.5,55" fill="url(#aLeftTop)" />
-                        <!-- Left Shaft Bottom Facet -->
-                        <polygon points="22.5,55 47.5,75 47.5,85 17.5,60" fill="url(#aLeftBot)" />
-                        <!-- Right Shaft Top Facet -->
-                        <polygon points="47.5,65 72.5,30 77.5,35 47.5,75" fill="url(#aRightTop)" />
-                        <!-- Right Shaft Bottom Facet -->
-                        <polygon points="47.5,75 77.5,35 82.5,40 47.5,85" fill="url(#aRightBot)" />
-                        <!-- Arrowhead Top Facet -->
-                        <polygon points="72.5,30 62.5,25 97.5,10 77.5,35" fill="url(#aHeadTop)" />
-                        <!-- Arrowhead Bottom Facet -->
-                        <polygon points="77.5,35 97.5,10 90.5,44 82.5,40" fill="url(#aHeadBot)" />
-                    </g>
-                </svg>
-            </div>
-            <span style="padding-top: 0.5rem;  font-weight:bold;">Analytics App</span>
+        <div class="app-brand" style="display: inline-flex; align-items: center; gap: 10px;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="32" height="32" fill="none">
+                <defs>
+                <linearGradient id="bgGrad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#1A212B" />
+                    <stop offset="100%" stop-color="#0E1117" />
+                </linearGradient>
+                <linearGradient id="barGrad" x1="0" y1="30" x2="0" y2="10" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#1E5288" />
+                    <stop offset="100%" stop-color="#4A90E2" />
+                </linearGradient>
+                </defs>
+                <!-- Rounded Badge Container -->
+                <rect x="1" y="1" width="38" height="38" rx="9" fill="url(#bgGrad)" stroke="#2A3342" stroke-width="1.5" />
+                <!-- Centered Ascending Analytics Bars -->
+                <rect x="10.5" y="21" width="4.5" height="9" rx="1.5" fill="url(#barGrad)" opacity="0.55" />
+                <rect x="17.75" y="15.5" width="4.5" height="14.5" rx="1.5" fill="url(#barGrad)" opacity="0.8" />
+                <rect x="25" y="10" width="4.5" height="20" rx="1.5" fill="url(#barGrad)" />
+            </svg>
+            <span style="color: #FFFFFF; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 16px;">Analytics App</span>
         </div>
         <hr>
         <style>
@@ -568,7 +507,6 @@ with st.sidebar:
         
     )
 
-    st.button("delete all", on_click=utils.delete_all)
 
     # Ανάλογα με την επιλογή το selectbox, εμφανίζεται το αντίστοιχο κουμπί
     # ώστε να κατεβάσει ο χρήστης το αντίστοιχο CSV
@@ -1259,7 +1197,7 @@ def render_search_query(search_query):
             results, 
             num_rows="delete",
             column_config={
-                            "DATE" : st.column_config.DateColumn(format="DD/MM/YYYY"),
+                            "DATE" : st.column_config.DateColumn(format="DD/MM/YYYY", help="DD/MM/YYYY"),
                             "ID": None
                         }, 
             hide_index=True,column_order=["DATE", "DESCRIPTION", amount_type, "CATEGORY", "NOTES"]
@@ -1275,7 +1213,7 @@ def render_search_query(search_query):
             results, 
             num_rows="delete",
             column_config={
-                            "DATE" : st.column_config.DateColumn(format="DD/MM/YYYY"),
+                            "DATE" : st.column_config.DateColumn(format="DD/MM/YYYY", help="DD/MM/YYYY"),
                             "ID": st.column_config.NumberColumn(default=None, alignment="left"),
                             "ROI": st.column_config.ProgressColumn(min_value=0,max_value=100,format="%.1f%%")
                         }, 
@@ -1294,7 +1232,7 @@ def render_search_query(search_query):
             results, 
             num_rows="delete",
             column_config={
-                "DATE" : st.column_config.DateColumn("DATE",format="DD/MM/YYYY"),
+                "DATE" : st.column_config.DateColumn("DATE",format="DD/MM/YYYY", help="DD/MM/YYYY"),
                 "ID" : None,
                 "CATEGORY": st.column_config.MultiselectColumn(
                     disabled=True,
@@ -1376,17 +1314,7 @@ def open_add_loss_entry_form():
             st.rerun()
 
 
-#st.markdown("""
-#<style>
-#    /* Target every column container in the main view */
-#    [data-testid="stColumn"] {
-#        border: 1px solid white !important;
-#        
-#        
-#       
-#    }
-#</style>
-#""", unsafe_allow_html=True)
+
 
 # μειώνω το gap που βρισκεται έξω απο το hr div
 # το οποίο ορίζει αυτόματα το streamlit
@@ -1396,9 +1324,7 @@ st.markdown("""
     hr {
         margin-top: 0.2rem !important;
         margin-bottom: 0.8rem !important;
-    }
-        
-    
+    }   
 </style>
 """, unsafe_allow_html=True)
 
@@ -1609,7 +1535,7 @@ def render_costs_losses():
                             height=428,
                             disabled=list(dataframe_costs.columns.values),
                             column_config={
-                                            "DATE" : st.column_config.DateColumn(format="DD/MM/YYYY"),
+                                            "DATE" : st.column_config.DateColumn(format="DD/MM/YYYY", help="DD/MM/YYYY"),
                                             "ID" : st.column_config.NumberColumn(default=None, alignment="left")
                                         }, 
                             hide_index=True, column_order=["DATE", "DESCRIPTION", "COST", "CATEGORY", "NOTES"]
@@ -1650,7 +1576,7 @@ def render_costs_losses():
                             height=428,
                             disabled=list(dataframe_losses.columns.values),
                             column_config={
-                                            "DATE" : st.column_config.DateColumn(format="DD/MM/YYYY"),
+                                            "DATE" : st.column_config.DateColumn(format="DD/MM/YYYY", help="DD/MM/YYYY"),
                                             "ID" : st.column_config.NumberColumn(default=None, alignment="left")
                                         }, 
                             hide_index=True, column_order=["DATE", "DESCRIPTION", "LOSS", "CATEGORY", "NOTES"]
@@ -2091,7 +2017,7 @@ def render_earnings():
                 height=428,
                 disabled=list(dataframe_earnings.columns.values),
                 column_config={
-                                "DATE" : st.column_config.DateColumn(format="DD/MM/YYYY"),
+                                "DATE" : st.column_config.DateColumn(format="DD/MM/YYYY", help="DD/MM/YYYY"),
                                 "ID": st.column_config.NumberColumn(default=None, alignment="left"),
                                 "ROI": st.column_config.ProgressColumn(min_value=0,max_value=100,format="%.1f%%"),
                             }, 
@@ -2265,7 +2191,7 @@ def render_earnings():
                 column_config={
                     "PROFIT": st.column_config.Column("PROFIT EST."),
                     "ROI": st.column_config.ProgressColumn(min_value=0, max_value=100, format="%.1f"),
-                    "DATE": st.column_config.DateColumn("DATE OF SALE",format="DD/MM/YYYY",),
+                    "DATE": st.column_config.DateColumn("DATE OF SALE",format="DD/MM/YYYY",help="DD/MM/YYYY"),
                     "ID": None
                 }
             )
@@ -2578,17 +2504,19 @@ def open_add_investment_entry_form():
             )
         # Μετατρέπω το currency σε κεφαλαία
         currency = currency.upper()
-
+        
         account = st.text_input("Account", value="account@mail.com")
         platform = st.selectbox(
             label = "Select Platform", options=utils.get_categories(database.get_investments_platforms),index=0,
             accept_new_options = True, help="Select/Add Category"
         )
+
+        active = st.toggle("Active", value=True, key="active_toggle")
         
         submit = st.form_submit_button("Add")
             
         if submit:
-            database.add_investment_entry(date, entry, description, amount, currency, account, platform)
+            database.add_investment_entry(category, date, entry, description, quantity, currency, platform, account, active)
             st.rerun()
 
 
@@ -2686,7 +2614,6 @@ def render_investments():
     with tablec:     
                         
         
-
         # Πίνακας investments
         dataframe_investments = utils.get_investments()
         if dataframe_investments.empty:
@@ -2698,7 +2625,7 @@ def render_investments():
                 height=428,
                 disabled=['ID', 'CATEGORY', 'DATE', 'ENTRY', 'DESCRIPTION', 'AMOUNT', 'CURRENCY', 'PLATFORM', 'ACCOUNT'],
                 column_config={
-                                "DATE" : st.column_config.DateColumn("DATE",format="DD/MM/YYYY"),
+                                "DATE" : st.column_config.DateColumn("DATE",format="DD/MM/YYYY", help="DD/MM/YYYY"),
                                 "ID" : None,
                                 "CATEGORY": st.column_config.MultiselectColumn(
                                     disabled=True,
@@ -2706,7 +2633,8 @@ def render_investments():
                                     color = ['#3B82F6', '#06B6D4', '#F43F5E', '#6366F1', '#8B5CF6', '#EC4899', '#475569'],                                
                                 ),
                                 "ACCOUNT": None,
-                                "ACTIVE": st.column_config.CheckboxColumn()
+                                "ACTIVE": st.column_config.CheckboxColumn(),
+                                "ENTRY": st.column_config.NumberColumn(help="Total Amount Invested")
                             }, 
                 hide_index=True
             )
@@ -2732,17 +2660,19 @@ def render_investments():
 
     # ----------    LINE CHART PORTOFOLIO VALUE    ----------
     with st.container(border=True):
-        st.subheader("Portofolio Value")
+        st.subheader("Portfolio Value")
+        st.caption("Investments Over Time")
         dataframe_investments_for_chart = utils.get_investments_line_chart()
-
+        dataframe_cumsum = dataframe_investments_for_chart["ENTRY"].cumsum()
+        
             
         fig = go.Figure()
         fig.add_trace(
             go.Scatter(
                 x=dataframe_investments_for_chart["DATE"],
-                y=dataframe_investments_for_chart["ENTRY"],
+                y=dataframe_cumsum,
                 mode="lines+markers",
-                name="Entry Cost",
+                name="Description",
                 # Solid border line
                 line=dict(color="#00d2ff", width=3, shape="linear"),  # smooth curve
                 # Faded area
@@ -2762,56 +2692,42 @@ def render_investments():
                 ),
                 hovertemplate=(
                     "<b>%{customdata[0]}</b><br>"
-                    "Date: %{x|%d %b %Y}<br>"
-                    "Entry: %{y:,.2f} %{customdata[1]}<br>"
+                    "Date: %{x}<br>"
+                    "Total Value: %{y:,.2f}€<br>"
+                    "Quantity: %{customdata[2]}<br>"
+                    "Platform: %{customdata[1]}<extra></extra>"
                 ),
-                customdata=dataframe_investments_for_chart[["DESCRIPTION", "CURRENCY"]],
+                customdata=dataframe_investments_for_chart[["DESCRIPTION", "PLATFORM", "QUANTITY"]],
             )
         )
 
             
         fig.update_layout(
-                autosize=False,   
-                width=1500,        
-                height=475,       
-                title=dict(
-                    text="<b>Investments Over Time</b>",
-                    font=dict(size=18, color="#ffffff"),
-                    x=0.02,
-                ),
+                autosize=True,   
+                 
                 paper_bgcolor="rgba(14, 17, 23, 0)",
                 plot_bgcolor="rgba(14, 17, 23, 0)",
-                hovermode="x unified",
-                xaxis=dict(
-                    showgrid=True,
-                    gridcolor="rgba(255, 255, 255, 0.07)",
-                    color="#a0a0a0",
-                    tickformat="%b %Y",
-                ),
-                yaxis=dict(
-                    showgrid=True,
-                    gridcolor="rgba(255, 255, 255, 0.07)",
-                    color="#a0a0a0",
-                    tickprefix="€",
-                    zeroline=False,
-                ),
+               
+                
                 margin=dict(l=40, r=40, t=50, b=40), # Increased left/right margins to prevent clipping
             )
-
-            # Disable Streamlit's container width override
-        st.plotly_chart(fig, use_container_width=False)    
+        fig.update_yaxes(title_font=dict(size=22), tickfont=dict(size=18, color="#94A3B8"), tickprefix="€")
+        fig.update_xaxes(title_font=dict(size=22), tickfont=dict(size=18, color="#94A3B8"), automargin=False, tickformat="%d %b %Y")
+        fig.update_layout(
+            hoverlabel=dict(
+                bgcolor="#292A33",
+                bordercolor="white",
+                font_size=16,
+                font_family='Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
+            ),
+            legend=dict(
+                font=dict(size=15)
+            ),
+            hovermode="closest"          
+        )   
+        st.plotly_chart(fig, use_container_width=True)    
             
-    
-         
-         
-      
-    
-
-
-
-
-                
-             
+                              
 
 # Άναλογα με την σελίδα καλείτε η function
 # η οποία αντιπροσωπεύει την κάθε μια

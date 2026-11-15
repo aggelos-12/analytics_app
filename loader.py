@@ -9,7 +9,7 @@ def add_to_database(dataframe):
     table_schema = { 
         "costs": ["DATE", "COST", "DESCRIPTION", "CATEGORY", "NOTES"],
         "earnings": ["CATEGORY", "PROFIT", "DESCRIPTION", "ROI", "NOTES", "DATE"],
-        "investments": ["CATEGORY", "DATE", "ENTRY", "DESCRIPTION", "AMOUNT", "CURRENCY", "PLATFORM", "ACCOUNT", "ACTIVE"],
+        "investments": ["CATEGORY", "DATE", "ENTRY", "DESCRIPTION", "QUANTITY", "CURRENCY", "PLATFORM", "ACCOUNT", "ACTIVE"],
         "losses": ["CATEGORY", "LOSS", "DESCRIPTION", "DATE", "NOTES"],
         "pearnings": ["CATEGORY", "PROFIT", "DESCRIPTION", "ROI", "NOTES", "DATE", "IMMEDIATE_TRANSFER"]
     }
@@ -24,7 +24,7 @@ def add_to_database(dataframe):
         "PROFIT": "numeric",
         "ROI": "numeric",
         "ENTRY": "numeric",
-        "AMOUNT": "numeric",
+        "QUANTITY": "numeric",
         "CURRENCY": "str",
         "ACCOUNT": "str",
         "PLATFORM": "str",

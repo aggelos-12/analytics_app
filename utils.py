@@ -170,8 +170,9 @@ def get_losses_or_costs(choice):
 def get_investments():
     #current_date = datetime.today()
     data_investments = database.get_investments()
-    data_investments = pd.DataFrame(data_investments, columns=['ID', 'CATEGORY', 'DATE', 'ENTRY', 'DESCRIPTION', 'AMOUNT', 'CURRENCY', 'PLATFORM', 'ACCOUNT', 'ACTIVE'])
+    data_investments = pd.DataFrame(data_investments, columns=['ID', 'CATEGORY', 'DATE', 'ENTRY', 'DESCRIPTION', 'QUANTITY', 'CURRENCY', 'PLATFORM', 'ACCOUNT', 'ACTIVE'])
     data_investments['DATE'] = pd.to_datetime(data_investments['DATE'], format='mixed')
+    
     #Σε περίπτωση όπου ο πίνακας είναι άδειος, διαγράφεται η στήλη ID
     if data_investments.empty:
         return data_investments.drop(columns=['ID'])
@@ -186,12 +187,12 @@ def get_investments():
 def get_investments_line_chart():
     current_date = datetime.today()
     dataframe_investments_for_chart = database.get_investments_for_line_chart()
-    dataframe_investments_for_chart = pd.DataFrame(dataframe_investments_for_chart, columns=["DATE", "ENTRY", "DESCRIPTION", "CURRENCY"])
+    if isinstance(dataframe_investments_for_chart, str):
+        return None
+    dataframe_investments_for_chart = pd.DataFrame(dataframe_investments_for_chart, columns=["DATE", "ENTRY", "DESCRIPTION", "PLATFORM", "QUANTITY"])
     dataframe_investments_for_chart["DATE"] = pd.to_datetime(dataframe_investments_for_chart["DATE"], format="mixed")
     
-    # φιλτράρω τα δεδομένα έτσι ώστε να επιστρέφονται μόνο οι επενδύσεις οι οποίες είναι
-    # ακόμα ενεργές βάση ημερομηνίας
-    dataframe_investments_for_chart = dataframe_investments_for_chart[dataframe_investments_for_chart["DATE"] > current_date]
+    
     return dataframe_investments_for_chart
 
 # Επιστρέφει τον πίνακα PENDING_EARNINGS ως panas dataframe
@@ -389,5 +390,5 @@ def delete_all():
 
 
 if __name__=='__main__':
-    print(get_platform_w_biggest_exposure())
+    print(get_investments_line_chart())
     
