@@ -337,8 +337,26 @@ st.markdown("""
 time.sleep(0.05)
 
 
-with st.sidebar:
 
+with st.sidebar:
+    # Κάνω disable το resizing του sidebar
+    st.markdown(
+    """
+    <style>
+        /* 1. Lock the sidebar width so dragging cannot resize it */
+        [data-testid="stSidebar"] {
+            min-width: 220px !important;
+            max-width: 220px !important;
+            width: 220px !important;
+        }
+
+
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+    
+    
     st.markdown(
         """
             <style>
