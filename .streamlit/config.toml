@@ -1,5 +1,5 @@
 [theme]
-base = "#0E1117"
+base = "dark"
 [server]
 enableStaticServing = true
 [client]
