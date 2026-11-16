@@ -1,0 +1,10 @@
+CATEGORY,LOSS,DESCRIPTION,DATE,NOTES
+Unpaid Invoices,450.0,Client default on invoice #1042,2025/02/28,Client declared insolvency
+Damaged Inventory,180.5,Water damage to retail stock,2025/04/15,Partial warehouse leak
+Chargebacks,95.0,Fraudulent payment dispute,2025/06/02,Bank forced refund
+Operational Waste,210.0,Unused cloud compute instances,2025/08/20,Test clusters left running
+Late Penalties,60.0,Late tax filing penalty fee,2025/10/11,Q3 delayed paperwork
+Defective Goods,140.0,Customer return - hardware defect,2025/12/04,Supplier refused warranty refund
+Chargebacks,115.0,Stolen credit card chargeback,2026/01/22,Chargeback fee included
+Contract Cancellation,320.0,Early vendor termination penalty,2026/03/14,Switched vendors prematurely
+Damaged Inventory,85.0,Transit damage during courier delivery,2026/05/09,Insurance claim denied

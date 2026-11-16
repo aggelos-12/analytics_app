@@ -1,0 +1,12 @@
+CATEGORY,DATE,ENTRY,DESCRIPTION,QUANTITY,CURRENCY,PLATFORM,ACCOUNT,ACTIVE
+BONDS,2026/10/28,1250.0,EU sovereign treasury bond allocation,9,USD,Degiro,Investments,1
+STOCKS,2026/11/25,1250.0,Scheduled end-of-month Nasdaq 100 buy,8,EUR,Interactive Brokers,Investments,0
+COMMODITIES,2026/11/12,1100.0,Physical gold ETC inflation hedge,6,EUR,Revolut,Savings,0
+CRYPTO,2026/11/10,500.0,Solana staking pool deposit,4,EUR,Binance,Crypto Staking,0
+CRYPTO,2026/10/19,650.0,Ethereum spot DCA accumulation,3,USD,Binance,Crypto Staking,1
+CRYPTO,2026/10/19,650.0,Ethereum spot DCA accumulation,3,USD,Binance,Crypto Staking,1
+REAL ESTATE,2026/11/07,1250.0,European commercial REIT shares,16,EUR,Degiro,Investments,1
+STOCKS,2027/01/10,1250.0,Q1 2027 dividend growth portfolio rebalance,15,EUR,Degiro,Investments,0
+STOCKS,2026/11/03,1250.0,MSCI World ETF core portfolio buy,12,EUR,Interactive Brokers,Investments,1
+STOCKS,2026/10/08,1250.0,S&P 500 Index ETF monthly allocation,10,USD,Interactive Brokers,Investments,1
+CRYPTO,2026/12/15,750.0,Year-end Bitcoin cold storage allocation,1,EUR,Binance,Crypto Staking,0

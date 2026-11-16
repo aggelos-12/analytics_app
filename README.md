@@ -56,9 +56,11 @@ A modern, high-fidelity personal finance and portfolio tracking dashboard built 
 │   ├── earnings_breakdown_1.png
 │   ├── earnings_breakdown_2.png
 │   ├── earnings_breakdown_3.png
+│   ├── earnings_breakdown_4.png
 │   ├── expenses_breakdown_1.png
 │   ├── expenses_breakdown_2.png
-│   └── portfolio_tracking.png
+│   ├── investments_breakdown_1.png
+│   └── investments_breakdown_2.png
 ├── database.db              # SQLite persistent storage (auto-initialized)
 ├── database.py              # Database connection, schemas, cached queries & CRUD logic
 ├── utils.py                 # Mathematical metrics, percentage calculators & formatters

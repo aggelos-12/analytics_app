@@ -1,0 +1,11 @@
+CATEGORY,PROFIT,DESCRIPTION,ROI,NOTES,DATE,IMMEDIATE_TRANSFER
+STOCKS,450.0,NVDA swing trade profit target,18,Awaiting final settlement,2026/05/05,1
+CRYPTO,280.5,ETH staking rewards distribution,12,Compounded yield payout,2026/05/12,0
+FOREX,195.0,EUR/USD breakout take-profit,15,Executed at key resistance,2026/05/18,1
+COMMODITIES,620.0,Gold futures swing target met,22,Macro hedge profit realization,2026/05/25,0
+REAL ESTATE,540.0,Commercial REIT quarterly dividend,8,Pending bank clearance,2026/06/01,1
+STOCKS,310.0,AAPL covered call premium,10,Monthly options income cycle,2026/06/10,0
+FINANCIAL SERVICES,850.0,Fintech advisory consulting retainer,35,Invoice awaiting client sign-off,2026/06/15,0
+CRYPTO,410.0,SOL liquidity pool fee share,24,Auto-harvested pool yield,2026/06/22,1
+COMMODITIES,380.0,Silver futures partial take-profit,14,Trailing stop exit triggered,2026/06/28,1
+VENTURE,1250.0,Early-stage secondary equity payout,45,Escrow transfer pending,2026/07/05,0
