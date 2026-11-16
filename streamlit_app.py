@@ -64,20 +64,20 @@ if "upload_version_main_upload_container" not in st.session_state:
 current_year = datetime.now().year
 
 # Κρύβω την πάνω μπάρα του streamlit (toolbox)
-#st.markdown("""
-#    <style>
-#        
-#        .block-container, [data-testid="stMainBlockContainer"] {
-#            padding-top: 0 !important;
-#            padding-bottom: 0 !important;
-#            
-#        }
-#        [data-testid="stHeader"] {
-#            display: none !important;
-#        }
-#        
-#    </style>
-#""", unsafe_allow_html=True)
+st.markdown("""
+    <style>
+        
+        .block-container, [data-testid="stMainBlockContainer"] {
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+            
+        }
+        [data-testid="stHeader"] {
+            display: none !important;
+        }
+        
+    </style>
+""", unsafe_allow_html=True)
 
 
 # Αφαιρώ τα anchors από τους τίτλους και αφαρώ το default κενό
@@ -2393,24 +2393,19 @@ def render_earnings():
             data_gross = database.get_gross_profit_each_year()
             # Συνολικό πόσο για costs & losses για κάθε χρόνο
             data_costs = database.get_cost_losses_each_year()
-               
-                
-            # περιέχει μόνο το costs&losses ποσό
-            data_costs_list = [element[1] for element in data_costs]
-                
-            if not data_costs_list:
-                st.write("please add cost losses")
-                st.stop()
+              
 
             dataframe_earnigns_cost_losses = pd.DataFrame(data_gross, columns=['YEAR', 'EARNINGS'])
-            dataframe_earnigns_cost_losses['COSTS_LOSSES'] = data_costs_list
-                
+            data_costs_df = pd.DataFrame(data_costs, columns=["YEAR", "COSTS_LOSSES"])
+            
+            merged_dataframe_earnigns_cost_losses = pd.merge(dataframe_earnigns_cost_losses, data_costs_df, how="outer", on="YEAR").fillna(0.0)
+           
             fig = go.Figure()
             # --- EARNINGS LINE ---
             fig.add_trace(
                 go.Scatter(
-                    x=dataframe_earnigns_cost_losses["YEAR"],
-                    y=dataframe_earnigns_cost_losses["EARNINGS"],
+                    x=merged_dataframe_earnigns_cost_losses["YEAR"],
+                    y=merged_dataframe_earnigns_cost_losses["EARNINGS"],
                     name="Earnings",
                     mode="lines+markers",
                     line=dict(color="#10B981", width=3.5, shape="spline"),
@@ -2423,8 +2418,8 @@ def render_earnings():
             # --- COSTS & LOSSES LINE ---
             fig.add_trace(
                 go.Scatter(
-                    x=dataframe_earnigns_cost_losses["YEAR"],
-                    y=dataframe_earnigns_cost_losses["COSTS_LOSSES"],
+                    x=merged_dataframe_earnigns_cost_losses["YEAR"],
+                    y=merged_dataframe_earnigns_cost_losses["COSTS_LOSSES"],
                     name="Costs & Losses",
                     mode="lines+markers",
                     line=dict(color="#FB7185", width=3.5, shape="spline"),

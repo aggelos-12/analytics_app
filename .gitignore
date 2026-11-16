@@ -5,6 +5,5 @@ venv/
 .DS_Store
 Thumbs.db
 *.pyc
-database.db
 TEST2.PY
 text.html
