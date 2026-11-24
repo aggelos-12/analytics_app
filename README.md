@@ -1,12 +1,13 @@
 # Personal Financial Analytics Dashboard
 
-URL : https://analyticsapp-5jcew2owaqrqoybjytbmuq.streamlit.app/
-
-**App gets paused if theres an extended period of inactivity, to activate it again press the button that streamlit displays, it should be live again in a few seconds.**
+**[Live Demo](https://analyticsapp-5jcew2owaqrqoybjytbmuq.streamlit.app/)**
+> *Note: Streamlit puts inactive apps to sleep. If paused, click the wake-up button on screen and it will load in a few seconds.*
 
 A modern, high-fidelity personal finance and portfolio tracking dashboard built with **Streamlit**, **Plotly**, and **SQLite**. Designed with a dark-mode mobile-banking aesthetic, fine-grained CSS customizations, and event-driven data caching.
 
 ## Visual Previews
+
+![Dashboard Overview](previews/dashboard_overview_1.png)
 
 ### Overview & Key Metrics
 
