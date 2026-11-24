@@ -7,15 +7,26 @@ A modern, high-fidelity personal finance and portfolio tracking dashboard built 
 
 ## Visual Previews
 
-![Dashboard Overview](previews/dashboard_overview_1.png)
-![Expenses Overview](previews/expenses_breakdown_1.png)
-![Earnings Overview](previews/earnings_breakdown_1.png)
-![Investments Overview](previews/investments_breakdown_1.png)
-
-### Overview & Key Metrics
-
-
+**Overview & Key Metrics**
 *High-level financial KPIs, Recent Transactions feed, Expense Breakdown, and Annual Performance.*
+
+![Dashboard Overview](previews/dashboard_overview_1.png)
+
+<details>
+<summary><strong>Click to view more screenshots (Costs, Earnings & Portfolio)</strong></summary>
+
+### Costs & Losses
+![Expenses](previews/expenses_breakdown_1.png)
+
+### Earnings & Pending Cashflow
+![Earnings Breakdown](previews/earnings_breakdown_1.png)
+
+### Investments & Portfolio
+![Investments Portfolio](previews/investments_breakdown_1.png)
+
+</details>
+
+
 
 ## Key Features
 
