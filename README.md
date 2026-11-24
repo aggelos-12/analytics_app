@@ -8,6 +8,9 @@ A modern, high-fidelity personal finance and portfolio tracking dashboard built 
 ## Visual Previews
 
 ![Dashboard Overview](previews/dashboard_overview_1.png)
+![Expenses Overview](previews/expenses_breakdown_1.png)
+![Earnings Overview](previews/earnings_breakdown_1.png)
+![Investments Overview](previews/investments_breakdown_1.png)
 
 ### Overview & Key Metrics
 
