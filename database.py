@@ -69,6 +69,9 @@ def initialize_database():
     connection.close()
 
 
+
+
+
 # Θέτει την σύνδεση με την βάση
 def get_connection():
     return sqlite3.connect("database.db")

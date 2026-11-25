@@ -62,7 +62,7 @@ A modern, high-fidelity personal finance and portfolio tracking dashboard built 
 
 * **Data Processing:** [Pandas](https://pandas.pydata.org/) for vectorized transformations, date sorting, and data reshaping.
 
-* **Database Backend:** [SQLite](https://sqlite.org/) with raw SQL queries using `UNION ALL` aggregation.
+* **Database Backend:** [SQLite](https://sqlite.org/) with raw SQL queries.
 
 * **Caching Architecture:** Event-driven invalidation using `@st.cache_data` on query layers, instantly invalidated upon create/delete mutations to minimize database I/O while guaranteeing up-to-date UI rendering.
 
@@ -144,5 +144,4 @@ If bulk importing records via the upload interface, files should follow these he
 
 Pre-formatted sample templates can be downloaded directly from the sidebar inside the running dashboard.
 
-## License
 

@@ -7,3 +7,5 @@ Thumbs.db
 *.pyc
 TEST2.PY
 text.html
+auth.db
+.venv
