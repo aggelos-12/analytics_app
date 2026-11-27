@@ -69,7 +69,7 @@ A modern, high-fidelity personal finance and portfolio tracking dashboard built 
 ## Project Structure
 
 ```
-├── assets/                  # Dashboard screenshots and UI assets
+├── previews/                  # Dashboard screenshots and UI assets
 │   ├── dashboard_overview_1.png
 │   ├── dashboard_overview_2.png
 │   ├── earnings_breakdown_1.png
